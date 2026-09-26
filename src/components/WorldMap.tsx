@@ -151,8 +151,8 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
   }, [paths.length > 0]);
 
   const currentTransform = (): ZoomTransform => {
-    const t = select(svgRef.current).datum() as { __zoom?: ZoomTransform } | undefined;
-    return t?.__zoom ?? zoomIdentity;
+    const svg = svgRef.current as (SVGSVGElement & { __zoom?: ZoomTransform }) | null;
+    return svg?.__zoom ?? zoomIdentity;
   };
 
   const transitioned = (make: (t: ZoomTransform, w: number, h: number) => ZoomTransform) => {
@@ -200,10 +200,8 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
     return Math.hypot(e.clientX - d.x, e.clientY - d.y) > 8;
   };
 
-  const graticuleD = geoPath(geoEqualEarth())(geoGraticule10()) ?? "";
-
-  const labelTick = paths; // recompute visibility on data and zoom-end renders
-  void labelTick;
+  const [graticuleD, setGraticuleD] = useState("");
+  const [sphereD, setSphereD] = useState("");
 
   return (
     <svg
