@@ -1,9 +1,8 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
-import { select } from "d3-selection";
-import { transition } from "d3-transition";
+import { select, type Selection } from "d3-selection";
+import { transition, type Transition } from "d3-transition";
 import { geoEqualEarth, geoPath, geoGraticule10 } from "d3-geo";
 import { zoom, zoomIdentity, type ZoomTransform } from "d3-zoom";
-import type { Selection, Transition } from "d3";
 import { feature } from "topojson-client";
 import { countryByNumeric, type CountryEntry, type EntryCategory } from "@/data/countries";
 import { categoryMeta } from "@/lib/entry";
@@ -77,14 +76,7 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
   useEffect(() => {
     const topo = (window as unknown as { __worldTopo?: unknown }).__worldTopo as Parameters<typeof feature>[0] | undefined;
     if (!topo || size.w < 50 || size.h < 50) return;
-    const proj = geoEqualEarth();
-    proj.fitExtent(
-      [
-        [size.w * 0.015, size.h * 0.05],
-        [size.w * 0.985, size.h * 0.95],
-      ],
-      { type: "Sphere" } as never,
-    );
+    const proj = makeProjection(size);
     const pathGen = geoPath(proj);
     const feats = (feature(topo, (topo as { objects: { countries: never } }).objects.countries) as { features: Array<{ id?: string | number }> }).features;
     const data: PathDatum[] = feats
@@ -104,7 +96,9 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
       .filter((p): p is PathDatum => p !== null);
     pathsRef.current = data;
     setPaths(data);
-  }, [size, ]);
+    setGraticuleD(pathGen(geoGraticule10()) ?? "");
+    setSphereD(pathGen({ type: "Sphere" } as never) ?? "");
+  }, [size]);
 
   // Attach d3-zoom (pan, wheel, pinch) once.
   useEffect(() => {
