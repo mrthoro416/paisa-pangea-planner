@@ -223,7 +223,7 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
       </defs>
       <rect width={size.w} height={size.h} fill="url(#ocean-glow)" />
       <g id="map-zoom-layer">
-        <path d={spherePathD(size)} fill="none" stroke="var(--border)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+        <path d={sphereD} fill="none" stroke="var(--border)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
         <path d={graticuleD} fill="none" stroke="oklch(1 0 0 / 4%)" strokeWidth="0.6" vectorEffect="non-scaling-stroke" />
         {paths.map((p) => {
           const entry = p.entry;
@@ -302,24 +302,33 @@ function applyLabelTransforms(
     .attr("transform", (d) => `translate(${d.cx * t.k + t.x}, ${d.cy * t.k + t.y})`);
 }
 
+function makeProjection(size: { w: number; h: number }) {
+  const proj = geoEqualEarth();
+  proj.fitExtent(
+    [
+      [size.w * 0.015, size.h * 0.05],
+      [size.w * 0.985, size.h * 0.95],
+    ],
+    { type: "Sphere" } as never,
+  );
+  return proj;
+}
+
+// Progressively reveal labels: top 18 large countries always, smaller ones as
+// their on-screen area grows with zoom.
 function visibleLabels(paths: PathDatum[], t: ZoomTransform) {
   const k = t.k;
   const ranked = [...paths]
-    .filter((p) => p.entry && p.area > 0 && Number.isFinite(p.cx))
+    .filter((p) => p.entry && p.area > 0 && Number.isFinite(p.cx) && Number.isFinite(p.cy))
     .sort((a, b) => b.area - a.area);
-  const maxLabels = Math.min(110, Math.round(16 + k * 9));
-  const minScreenArea = 380 / (k * k);
-  let shown = 0;
-  const out: Array<{ p: PathDatum; catLabel: string }> = [];
-  for (const p of ranked) {
-    if (shown >= maxLabels) break;
-    const qualifies = p.area * k * k > minScreenArea * k * k || shown < Math.min(18, maxLabels);
-    if (!qualifies) continue;
-    if (p.area * k * k < 120 && shown >= 18) continue;
-    shown += 1;
-    out.push({ p, catLabel: p.entry!.name });
-  }
-  return out.map(({ p, catLabel }) => (
+  const out: PathDatum[] = [];
+  ranked.forEach((p, rank) => {
+    const screenArea = p.area * k * k;
+    const always = rank < 18;
+    if (screenArea >= 220 || always) out.push(p);
+  });
+  const cap = Math.min(110, Math.round(16 + k * 9));
+  return out.slice(0, cap).map((p) => (
     <text
       key={p.id}
       transform={`translate(${p.cx * t.k + t.x}, ${p.cy * t.k + t.y})`}
@@ -333,20 +342,7 @@ function visibleLabels(paths: PathDatum[], t: ZoomTransform) {
       paintOrder="stroke"
       style={{ letterSpacing: "0.04em", textTransform: "uppercase" }}
     >
-      {catLabel}
+      {p.entry!.name}
     </text>
   ));
-}
-
-function spherePathD(size: { w: number; h: number }): string {
-  if (size.w < 50) return "";
-  const proj = geoEqualEarth();
-  proj.fitExtent(
-    [
-      [size.w * 0.015, size.h * 0.05],
-      [size.w * 0.985, size.h * 0.95],
-    ],
-    { type: "Sphere" } as never,
-  );
-  return geoPath(proj)({ type: "Sphere" } as never) ?? "";
 }
