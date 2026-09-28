@@ -78,7 +78,8 @@ function About() {
         <p className="mt-3 text-sm leading-relaxed text-foreground/85">
           Visa classifications are compiled from the open-source passport-index dataset
           (github.com/ilyankou/passport-index-dataset), which aggregates official government
-          announcements and IATA travel information, reviewed as of {COUNTRIES[0].lastVerified}. Links
+          announcements and IATA travel information, reviewed as of{" "}
+          {COUNTRIES[0]?.lastVerified ?? "2026-09-26"}. Links
           in each country panel point to official government portals wherever one could be confidently
           identified — destinations without a verified official source say so explicitly instead of
           guessing.

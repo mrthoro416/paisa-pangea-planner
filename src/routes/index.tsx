@@ -91,7 +91,7 @@ function Index() {
 
         <p className="absolute bottom-1.5 left-3 hidden text-[10px] text-muted-foreground lg:block">
           {PASSPORT.flag} {PASSPORT.name} passport · {COUNTRIES.length} destinations · verified{" "}
-          {COUNTRIES[0].lastVerified} ·{" "}
+          {COUNTRIES[0]?.lastVerified ?? "2026-09-26"} ·{" "}
           <a href="/about" className="underline underline-offset-2 hover:text-foreground">
             data & sources
           </a>
