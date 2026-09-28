@@ -115,7 +115,7 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
       })
       .on("end", () => {
         // Visibility of labels recomputed once a gesture settles.
-        applyLabelTransforms(labels, pathsRef.current, currentTransform(svg));
+        applyLabelTransforms(labels, pathsRef.current, currentTransform());
       });
     zoomRef.current = zb;
     select(svg)
