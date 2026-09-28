@@ -297,9 +297,18 @@ function applyLabelTransforms(
   paths: PathDatum[],
   t: ZoomTransform,
 ) {
+  const byId = new Map(paths.map((p) => [p.id, p]));
   labels
-    .selectAll<SVGTextElement, PathDatum>("text")
-    .attr("transform", (d) => `translate(${d.cx * t.k + t.x}, ${d.cy * t.k + t.y})`);
+    .selectAll<SVGTextElement, unknown>("text")
+    .each(function () {
+      const id = this.getAttribute("data-id");
+      const p = id ? byId.get(id) : undefined;
+      if (!p) return;
+      select(this).attr(
+        "transform",
+        `translate(${p.cx * t.k + t.x}, ${p.cy * t.k + t.y})`,
+      );
+    });
 }
 
 function makeProjection(size: { w: number; h: number }) {
@@ -332,6 +341,7 @@ function visibleLabels(paths: PathDatum[], t: ZoomTransform) {
     <text
       key={p.id}
       transform={`translate(${p.cx * t.k + t.x}, ${p.cy * t.k + t.y})`}
+      data-id={p.id}
       textAnchor="middle"
       className="font-sans"
       fontSize={10.5}
