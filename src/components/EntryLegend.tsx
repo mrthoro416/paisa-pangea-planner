@@ -20,7 +20,7 @@ export function EntryLegend({ counts, activeFilter, onFilter, orientation = "row
         type="button"
         aria-pressed={activeFilter === key}
         onClick={() => onFilter(activeFilter === key ? null : key)}
-        className={`tap-target group flex items-center gap-2 rounded-xl px-2.5 py-1.5 text-left transition-all ${
+        className={`tap-target group flex items-center gap-2 rounded-xl px-2 py-1.5 text-left transition-all ${
           activeFilter === key ? "bg-beacon-soft ring-1 ring-beacon" : ""
         } ${active ? "" : "opacity-45"}`}
       >
@@ -51,7 +51,9 @@ export function EntryLegend({ counts, activeFilter, onFilter, orientation = "row
     >
       <div
         className={
-          isColumn ? "flex flex-col items-stretch" : "flex max-w-full items-center gap-0.5 overflow-x-auto"
+          isColumn
+            ? "flex flex-col items-stretch"
+            : "scrollbar-hide flex max-w-full items-center gap-0.5 overflow-x-auto"
         }
       >
         {items}
