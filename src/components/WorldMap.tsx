@@ -65,8 +65,8 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
     const el = svgRef.current?.parentElement;
     if (!el) return;
     const ro = new ResizeObserver((entries) => {
-      const r = entries[0].contentRect;
-      setSize({ w: r.width, h: r.height });
+      const rect = entries[0]?.contentRect;
+      if (rect) setSize({ w: rect.width, h: rect.height });
     });
     ro.observe(el);
     return () => ro.disconnect();
