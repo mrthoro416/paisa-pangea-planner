@@ -40,7 +40,7 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
   const pathsRef = useRef<PathDatum[]>([]);
   const [paths, setPaths] = useState<PathDatum[]>([]);
   const [size, setSize] = useState({ w: 0, h: 0 });
-  const [, setRenderTick] = useState(0);
+  const [topo, setTopo] = useState<unknown>(null);
   const pointerDown = useRef<{ x: number; y: number; t: number } | null>(null);
   const lastTap = useRef<{ t: number; x: number; y: number } | null>(null);
 
