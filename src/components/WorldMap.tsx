@@ -49,12 +49,10 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
     let cancelled = false;
     fetch("/data/world-50m.json")
       .then((r) => r.json())
-      .then((topo) => {
-        if (cancelled) return;
-        (window as unknown as { __worldTopo?: unknown }).__worldTopo = topo;
-        setRenderTick((t) => t + 1);
+      .then((json) => {
+        if (!cancelled) setTopo(json);
       })
-      .catch(() => setRenderTick((t) => t + 1));
+      .catch(() => setTopo(null));
     return () => {
       cancelled = true;
     };
@@ -74,7 +72,6 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
 
   // Build projected paths whenever topology or size changes.
   useEffect(() => {
-    const topo = (window as unknown as { __worldTopo?: unknown }).__worldTopo as Parameters<typeof feature>[0] | undefined;
     if (!topo || size.w < 50 || size.h < 50) return;
     const proj = makeProjection(size);
     const pathGen = geoPath(proj);
