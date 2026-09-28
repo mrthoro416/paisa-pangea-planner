@@ -98,7 +98,7 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
     setPaths(data);
     setGraticuleD(pathGen(geoGraticule10()) ?? "");
     setSphereD(pathGen({ type: "Sphere" } as never) ?? "");
-  }, [size]);
+  }, [topo, size]);
 
   // Attach d3-zoom (pan, wheel, pinch) once.
   useEffect(() => {
