@@ -40,7 +40,7 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
   const pathsRef = useRef<PathDatum[]>([]);
   const [paths, setPaths] = useState<PathDatum[]>([]);
   const [size, setSize] = useState({ w: 0, h: 0 });
-  const [, setRenderTick] = useState(0);
+  const [topo, setTopo] = useState<unknown>(null);
   const pointerDown = useRef<{ x: number; y: number; t: number } | null>(null);
   const lastTap = useRef<{ t: number; x: number; y: number } | null>(null);
 
@@ -49,12 +49,10 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
     let cancelled = false;
     fetch("/data/world-50m.json")
       .then((r) => r.json())
-      .then((topo) => {
-        if (cancelled) return;
-        (window as unknown as { __worldTopo?: unknown }).__worldTopo = topo;
-        setRenderTick((t) => t + 1);
+      .then((json) => {
+        if (!cancelled) setTopo(json);
       })
-      .catch(() => setRenderTick((t) => t + 1));
+      .catch(() => setTopo(null));
     return () => {
       cancelled = true;
     };
@@ -65,8 +63,8 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
     const el = svgRef.current?.parentElement;
     if (!el) return;
     const ro = new ResizeObserver((entries) => {
-      const r = entries[0].contentRect;
-      setSize({ w: r.width, h: r.height });
+      const rect = entries[0]?.contentRect;
+      if (rect) setSize({ w: rect.width, h: rect.height });
     });
     ro.observe(el);
     return () => ro.disconnect();
@@ -74,21 +72,23 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
 
   // Build projected paths whenever topology or size changes.
   useEffect(() => {
-    const topo = (window as unknown as { __worldTopo?: unknown }).__worldTopo as Parameters<typeof feature>[0] | undefined;
     if (!topo || size.w < 50 || size.h < 50) return;
     const proj = makeProjection(size);
     const pathGen = geoPath(proj);
-    const feats = (feature(topo, (topo as { objects: { countries: never } }).objects.countries) as { features: Array<{ id?: string | number }> }).features;
-    const data: PathDatum[] = feats
+    const fc = feature(
+      topo as never,
+      (topo as unknown as { objects: { countries: never } }).objects.countries,
+    ) as unknown as { features: Array<{ id?: string | number }> };
+    const data: PathDatum[] = fc.features
       .map((f) => {
         const d = pathGen(f as never);
         if (!d) return null;
-        const [cx, cy] = pathGen.centroid(f as never);
+        const c = pathGen.centroid(f as never);
         return {
           id: String(f.id ?? ""),
           d,
-          cx,
-          cy,
+          cx: c[0] ?? 0,
+          cy: c[1] ?? 0,
           area: Math.abs(pathGen.area(f as never)),
           entry: countryByNumeric.get(String(f.id ?? "")) ?? null,
         };
@@ -98,7 +98,7 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
     setPaths(data);
     setGraticuleD(pathGen(geoGraticule10()) ?? "");
     setSphereD(pathGen({ type: "Sphere" } as never) ?? "");
-  }, [size]);
+  }, [topo, size]);
 
   // Attach d3-zoom (pan, wheel, pinch) once.
   useEffect(() => {
@@ -115,7 +115,7 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
       })
       .on("end", () => {
         // Visibility of labels recomputed once a gesture settles.
-        setRenderTick((t) => t + 1);
+        applyLabelTransforms(labels, pathsRef.current, currentTransform());
       });
     zoomRef.current = zb;
     select(svg)
@@ -297,9 +297,18 @@ function applyLabelTransforms(
   paths: PathDatum[],
   t: ZoomTransform,
 ) {
+  const byId = new Map(paths.map((p) => [p.id, p]));
   labels
-    .selectAll<SVGTextElement, PathDatum>("text")
-    .attr("transform", (d) => `translate(${d.cx * t.k + t.x}, ${d.cy * t.k + t.y})`);
+    .selectAll<SVGTextElement, unknown>("text")
+    .each(function () {
+      const id = this.getAttribute("data-id");
+      const p = id ? byId.get(id) : undefined;
+      if (!p) return;
+      select(this).attr(
+        "transform",
+        `translate(${p.cx * t.k + t.x}, ${p.cy * t.k + t.y})`,
+      );
+    });
 }
 
 function makeProjection(size: { w: number; h: number }) {
@@ -332,6 +341,7 @@ function visibleLabels(paths: PathDatum[], t: ZoomTransform) {
     <text
       key={p.id}
       transform={`translate(${p.cx * t.k + t.x}, ${p.cy * t.k + t.y})`}
+      data-id={p.id}
       textAnchor="middle"
       className="font-sans"
       fontSize={10.5}

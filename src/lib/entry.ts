@@ -109,17 +109,17 @@ export function requirementItems(c: CountryEntry): string[] {
 }
 
 export function requirementSummary(c: CountryEntry): string {
-  const stay = maxStayText(c);
-  const stayClause = stay ? ` for stays of up to ${stay.replace(/^Up to /, "")}` : "";
+  const stayTxt = maxStayText(c)?.replace(/^Up to /, "") ?? null;
+  const stayClause = stayTxt ? ` for stays of up to ${stayTxt}` : "";
   switch (c.category) {
     case "visa_free":
       return `Colombian passport holders may enter ${c.name} without a visa for short-term tourism${stayClause}.`;
     case "visa_on_arrival":
-      return `Colombian passport holders can obtain a visa on arrival in ${c.name} at the border${stayClause ? ` — typically ${stay.replace(/^Up to /, "").toLowerCase()}` : ""}.`;
+      return `Colombian passport holders can obtain a visa on arrival in ${c.name} at the border${stayTxt ? ` — typically ${stayTxt.toLowerCase()}` : ""}.`;
     case "evisa":
-      return `Colombian passport holders must complete ${c.name}'s online visa application before traveling${stayClause ? ` — stays of ${stay.replace(/^Up to /, "").toLowerCase()} are typical` : ""}.`;
+      return `Colombian passport holders must complete ${c.name}'s online visa application before traveling${stayTxt ? ` — stays of ${stayTxt.toLowerCase()} are typical` : ""}.`;
     case "eta":
-      return `Colombian passport holders need an electronic travel authorization or registration before traveling to ${c.name}${stayClause ? ` — ${stay.replace(/^Up to /, "").toLowerCase()} permitted` : ""}.`;
+      return `Colombian passport holders need an electronic travel authorization or registration before traveling to ${c.name}${stayTxt ? ` — ${stayTxt.toLowerCase()} permitted` : ""}.`;
     case "visa_required":
       return `Colombian passport holders must obtain a visa from ${c.name}'s embassy or consulate before traveling.`;
   }
