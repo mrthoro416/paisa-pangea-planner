@@ -78,17 +78,20 @@ export const WorldMap = forwardRef<WorldMapHandle, WorldMapProps>(function World
     if (!topo || size.w < 50 || size.h < 50) return;
     const proj = makeProjection(size);
     const pathGen = geoPath(proj);
-    const feats = (feature(topo, (topo as { objects: { countries: never } }).objects.countries) as { features: Array<{ id?: string | number }> }).features;
-    const data: PathDatum[] = feats
+    const fc = feature(
+      topo as never,
+      (topo as unknown as { objects: { countries: never } }).objects.countries,
+    ) as unknown as { features: Array<{ id?: string | number }> };
+    const data: PathDatum[] = fc.features
       .map((f) => {
         const d = pathGen(f as never);
         if (!d) return null;
-        const [cx, cy] = pathGen.centroid(f as never);
+        const c = pathGen.centroid(f as never);
         return {
           id: String(f.id ?? ""),
           d,
-          cx,
-          cy,
+          cx: c[0] ?? 0,
+          cy: c[1] ?? 0,
           area: Math.abs(pathGen.area(f as never)),
           entry: countryByNumeric.get(String(f.id ?? "")) ?? null,
         };
