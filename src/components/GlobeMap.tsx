@@ -288,7 +288,7 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
         {labels.map((l) => (
           <div
             key={l.code}
-            className="fade-in absolute flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 whitespace-nowrap"
+            className="fade-in absolute flex items-center gap-1.5 whitespace-nowrap"
             style={{ transform: `translate(${l.x}px, ${l.y}px) translate(-50%, -50%)`, left: 0, top: 0 }}
           >
             <span className="size-1 rounded-full" style={{ background: l.color }} />
