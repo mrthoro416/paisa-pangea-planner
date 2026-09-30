@@ -281,7 +281,8 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
     <div className="absolute inset-0">
       <div
         ref={el}
-        className="!absolute inset-0 h-full w-full"
+        className="inset-0"
+        style={{ position: "absolute", inset: 0 }}
         role="application"
         aria-label="Interactive globe of entry requirements for Colombian passport holders"
       />
