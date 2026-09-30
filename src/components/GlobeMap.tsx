@@ -48,12 +48,14 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
     let disposed = false;
     reduced.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     (async () => {
-      const [maplibregl, topo] = await Promise.all([
+      const [maplibregl, workerUrl, topo] = await Promise.all([
         import("maplibre-gl"),
+        import("maplibre-gl/dist/maplibre-gl-worker.mjs?url").then((m) => m.default as string),
         fetch("/data/world-50m.json").then((r) => r.json()),
       ]);
       await import("maplibre-gl/dist/maplibre-gl.css");
       if (disposed || !el.current) return;
+      maplibregl.setWorkerUrl(workerUrl);
 
       const fc = feature(topo, topo.objects.countries) as unknown as GeoJSON.FeatureCollection;
       fc.features.forEach((f, i) => {
