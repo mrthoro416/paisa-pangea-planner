@@ -1,4 +1,5 @@
-import { PASSPORT, LAST_VERIFIED } from "@/data/countries";
+import { PASSPORT, COUNTRIES } from "@/data/countries";
+const LAST_VERIFIED = COUNTRIES[0]?.lastVerified ?? "2026-09-26";
 import { BeaconMark } from "@/components/BeaconLogo";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
 import { formatVerified } from "@/lib/filters";
