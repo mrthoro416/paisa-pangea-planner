@@ -1,29 +1,24 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
-import { PASSPORT, type CountryEntry, type EntryCategory } from "@/data/countries";
-import { CATEGORIES, CATEGORY_ORDER } from "@/lib/entry";
-import { WorldMap, type WorldMapHandle } from "@/components/WorldMap";
-import { BeaconLogo } from "@/components/BeaconLogo";
-import { CountrySearch } from "@/components/CountrySearch";
-import { EntryLegend } from "@/components/EntryLegend";
-import { MapControls } from "@/components/MapControls";
-import { CountryPanel } from "@/components/CountryPanel";
-import { COUNTRIES } from "@/data/countries";
+import { COUNTRIES, type CountryEntry } from "@/data/countries";
+import { FILTERS, filterByKey, isAccessible, type FilterKey } from "@/lib/filters";
+import { GlobeMap, type GlobeHandle } from "@/components/GlobeMap";
+import { PassportHUD } from "@/components/PassportHUD";
+import { FilterBar } from "@/components/FilterBar";
+import { CommandSearch } from "@/components/CommandSearch";
+import { CountrySheet } from "@/components/CountrySheet";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Paisa Planner — Colombian Passport Global Entry Guide" },
+      { title: "Paisa Planner — Where can a Colombian passport take you?" },
       {
         name: "description",
         content:
-          "Interactive world map showing where Colombian passport holders can travel and what entry authorization they need — visa-free, visa on arrival, eVisa, ETA or embassy visa.",
+          "A 3D globe of entry requirements for Colombian passport holders — visa-free, visa on arrival, eVisa, ETA or embassy visa, with verification dates and official sources.",
       },
-      { property: "og:title", content: "Paisa Planner — Colombian Passport Global Entry Guide" },
-      {
-        property: "og:description",
-        content: "Where can Colombian citizens travel — and what do they need? Tap any country to find out.",
-      },
+      { property: "og:title", content: "Paisa Planner — Colombian Passport Globe" },
+      { property: "og:description", content: "Spin the globe. See where your Colombian passport takes you — in seconds." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -33,72 +28,81 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const [selected, setSelected] = useState<CountryEntry | null>(null);
-  const [filter, setFilter] = useState<EntryCategory | null>(null);
-  const mapRef = useRef<WorldMapHandle>(null);
+  const [filter, setFilter] = useState<FilterKey>("all");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const globe = useRef<GlobeHandle>(null);
 
-  const counts = useMemo(() => {
-    const c = { visa_free: 0, visa_on_arrival: 0, evisa: 0, eta: 0, visa_required: 0 } as Record<
-      EntryCategory,
-      number
-    >;
-    for (const country of COUNTRIES) c[country.category] += 1;
-    return c;
-  }, []);
+  const counts = useMemo(
+    () => Object.fromEntries(FILTERS.map((f) => [f.key, COUNTRIES.filter(f.test).length])) as Record<FilterKey, number>,
+    [],
+  );
+  const accessible = useMemo(() => COUNTRIES.filter(isAccessible).length, []);
+  const hudCount = filter === "all" ? accessible : counts[filter];
+  const hudLabel = filter === "all" ? "without embassy visa" : filterByKey.get(filter)!.label.toLowerCase();
 
-  const resetAll = () => {
+  const reset = () => {
     setSelected(null);
-    setFilter(null);
-    mapRef.current?.resetView();
+    setFilter("all");
+    globe.current?.resetView();
   };
-
-  const pickCountry = (c: CountryEntry) => {
+  const pick = (c: CountryEntry | null) => {
     setSelected(c);
-    mapRef.current?.zoomToCountry(c);
+    if (c) globe.current?.flyTo(c);
   };
 
   return (
-    <div className="app-fixed flex flex-col bg-background">
-      <header
-        className="flex shrink-0 items-center gap-2 px-2 pb-1 sm:gap-4 sm:px-4"
-        style={{ paddingTop: "max(env(safe-area-inset-top), 0.6rem)" }}
+    <div className="app-fixed bg-background">
+      <h1 className="sr-only">Paisa Planner — entry requirements for Colombian passport holders</h1>
+      <GlobeMap ref={globe} selectedCode={selected?.code ?? null} filter={filter} onSelect={pick} />
+
+      {/* Top HUD */}
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-2 px-3 lg:px-5"
+        style={{ paddingTop: "max(env(safe-area-inset-top), 0.75rem)" }}
       >
-        <BeaconLogo onReset={resetAll} />
-        <div className="ml-auto w-full max-w-[15rem] sm:max-w-72">
-          <CountrySearch onSelect={pickCountry} />
+        <div className="pointer-events-auto min-w-0">
+          <PassportHUD count={hudCount} total={COUNTRIES.length} label={hudLabel} onReset={reset} />
         </div>
-      </header>
+        <button
+          type="button"
+          onClick={() => setSearchOpen(true)}
+          className="map-overlay pointer-events-auto hidden h-12 shrink-0 items-center gap-3 rounded-full pl-4 pr-2 text-sm text-muted-foreground transition-colors hover:text-foreground lg:flex"
+        >
+          ⌕ Search destinations
+          <kbd className="mono rounded-full bg-accent px-2 py-1 text-faint">⌘K</kbd>
+        </button>
+      </div>
 
-      <main className="relative flex-1">
-        <WorldMap ref={mapRef} selectedCode={selected?.code ?? null} activeFilter={filter} onSelect={setSelected} />
-
-        {/* Persistent legend — never part of the zoomable canvas */}
-        <div className="absolute left-2 right-14 top-2 lg:hidden">
-          <EntryLegend counts={counts} activeFilter={filter} onFilter={setFilter} orientation="row" />
+      {/* Bottom controls — thumb zone */}
+      <div
+        className={`absolute inset-x-0 bottom-0 z-20 flex flex-col items-center gap-2 px-3 transition-opacity duration-300 lg:items-start lg:px-5 ${selected ? "pointer-events-none opacity-0 lg:pointer-events-auto lg:opacity-100" : ""}`}
+        style={{ paddingBottom: "max(env(safe-area-inset-bottom), 0.9rem)" }}
+      >
+        <div className="w-full max-w-full lg:w-auto lg:max-w-[calc(100vw-460px)]">
+          <FilterBar value={filter} counts={counts} onChange={setFilter} />
         </div>
-        <div className="absolute bottom-4 left-4 z-10 hidden lg:block">
-          <div className="mb-2">
-            <EntryLegend counts={counts} activeFilter={filter} onFilter={setFilter} orientation="column" />
-          </div>
-        </div>
+        <button
+          type="button"
+          onClick={() => setSearchOpen(true)}
+          className="map-overlay flex h-14 w-full items-center gap-3 rounded-full px-5 text-[16px] text-muted-foreground transition-transform active:scale-[0.98] lg:hidden"
+        >
+          <span aria-hidden>⌕</span> Where to?
+        </button>
+        <a href="/about" className="mono hidden text-faint hover:text-muted-foreground lg:block">
+          Data & sources
+        </a>
+      </div>
 
-        <div className="absolute right-2 top-2 sm:right-3 sm:top-3">
-          <MapControls
-            onZoomIn={() => mapRef.current?.zoomIn()}
-            onZoomOut={() => mapRef.current?.zoomOut()}
-            onReset={() => mapRef.current?.resetView()}
-          />
-        </div>
-
-        <p className="absolute bottom-1.5 left-3 hidden text-[10px] text-muted-foreground lg:block">
-          {PASSPORT.flag} {PASSPORT.name} passport · {COUNTRIES.length} destinations · verified{" "}
-          {COUNTRIES[0]?.lastVerified ?? "2026-09-26"} ·{" "}
-          <a href="/about" className="underline underline-offset-2 hover:text-foreground">
-            data & sources
-          </a>
-        </p>
-
-        <CountryPanel country={selected} onClose={() => setSelected(null)} />
-      </main>
+      <CommandSearch
+        open={searchOpen}
+        onOpenChange={setSearchOpen}
+        onPickCountry={pick}
+        onPickFilter={(k) => {
+          setSelected(null);
+          setFilter(k);
+        }}
+      />
+      <CountrySheet country={selected} onClose={() => setSelected(null)} />
     </div>
   );
 }

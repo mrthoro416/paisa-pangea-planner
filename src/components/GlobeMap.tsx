@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
-import type { Map as MLMap, GeoJSONSource, MapGeoJSONFeature } from "maplibre-gl";
+import type { Map as MLMap, MapGeoJSONFeature } from "maplibre-gl";
 import { feature } from "topojson-client";
 import { countryByNumeric, COUNTRIES, type CountryEntry } from "@/data/countries";
 import { CATEGORIES } from "@/lib/entry";
@@ -48,12 +48,14 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
     let disposed = false;
     reduced.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     (async () => {
-      const [{ default: maplibregl }, topo] = await Promise.all([
+      const [maplibregl, workerUrl, topo] = await Promise.all([
         import("maplibre-gl"),
+        import("maplibre-gl/dist/maplibre-gl-worker.mjs?url").then((m) => m.default as string),
         fetch("/data/world-50m.json").then((r) => r.json()),
       ]);
       await import("maplibre-gl/dist/maplibre-gl.css");
       if (disposed || !el.current) return;
+      maplibregl.setWorkerUrl(workerUrl);
 
       const fc = feature(topo, topo.objects.countries) as unknown as GeoJSON.FeatureCollection;
       fc.features.forEach((f, i) => {
@@ -169,7 +171,7 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
       const entryOf = (f?: MapGeoJSONFeature) =>
         f ? COUNTRIES.find((c) => c.code === (f.properties as { code?: string }).code) ?? null : null;
 
-      map.on("mousemove", "fill", (e) => {
+      map.on("mousemove", "fill", (e: { features?: MapGeoJSONFeature[]; point: { x: number; y: number } }) => {
         const f = e.features?.[0];
         const c = entryOf(f);
         setHoverId(c ? (f!.id as number) : null);
@@ -181,7 +183,7 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
         setHover(null);
         map.getCanvas().style.cursor = "";
       });
-      map.on("click", (e) => {
+      map.on("click", (e: { point: Parameters<MLMap["project"]>[0] extends never ? never : import("maplibre-gl").Point }) => {
         const f = map.queryRenderedFeatures(e.point, { layers: ["fill"] })[0];
         onSelectRef.current(entryOf(f));
       });
@@ -255,7 +257,6 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
         },
       );
     }
-    (map.getSource("countries") as GeoJSONSource | undefined)?.triggerRepaint?.();
   }, [ready, selectedCode, filter]);
 
   useImperativeHandle(ref, () => ({
@@ -280,7 +281,8 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
     <div className="absolute inset-0">
       <div
         ref={el}
-        className="absolute inset-0"
+        className="inset-0"
+        style={{ position: "absolute", inset: 0 }}
         role="application"
         aria-label="Interactive globe of entry requirements for Colombian passport holders"
       />
@@ -288,7 +290,7 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
         {labels.map((l) => (
           <div
             key={l.code}
-            className="fade-in absolute flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 whitespace-nowrap"
+            className="fade-in absolute flex items-center gap-1.5 whitespace-nowrap"
             style={{ transform: `translate(${l.x}px, ${l.y}px) translate(-50%, -50%)`, left: 0, top: 0 }}
           >
             <span className="size-1 rounded-full" style={{ background: l.color }} />
