@@ -81,10 +81,10 @@
 
   /* Entry categories — five fixed hues, tuned quieter for the midnight globe */
   --cat-green: #00e676;
-  --cat-blue: oklch(0.72 0.12 232);
-  --cat-purple: oklch(0.68 0.13 302);
-  --cat-yellow: oklch(0.85 0.13 95);
-  --cat-orange: oklch(0.72 0.14 50);
+  --cat-blue: #4aa8e0;
+  --cat-purple: #b384e6;
+  --cat-yellow: #f0d25a;
+  --cat-orange: #f08a4b;
 
   --ocean: #0d0d10;
   --land: #2c2c35;

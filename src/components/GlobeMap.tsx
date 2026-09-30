@@ -181,7 +181,7 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
         setHover(null);
         map.getCanvas().style.cursor = "";
       });
-      map.on("click", (e: { point: { x: number; y: number } }) => {
+      map.on("click", (e: { point: Parameters<MLMap["project"]>[0] extends never ? never : import("maplibre-gl").Point }) => {
         const f = map.queryRenderedFeatures(e.point, { layers: ["fill"] })[0];
         onSelectRef.current(entryOf(f));
       });
