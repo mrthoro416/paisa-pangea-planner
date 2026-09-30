@@ -51,7 +51,7 @@ export function CommandSearch({ open, onOpenChange, onPickCountry, onPickFilter 
 
   const results = useMemo(() => {
     const n = norm(q.trim());
-    type R = { kind: "filter"; key: FilterKey; region?: string; label: string } | { kind: "country"; c: CountryEntry };
+    type R = { kind: "filter"; key: FilterKey; region?: string | undefined; label: string } | { kind: "country"; c: CountryEntry };
     const out: R[] = [];
     if (!n) return COUNTRIES.filter((c) => ["JP", "BR", "ES", "US", "MX", "TH"].includes(c.code)).map((c) => ({ kind: "country", c }) as R);
     const fk = FILTER_WORDS.find(([re]) => re.test(n))?.[1];

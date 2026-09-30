@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
-import type { Map as MLMap, GeoJSONSource, MapGeoJSONFeature } from "maplibre-gl";
+import type { Map as MLMap, MapGeoJSONFeature } from "maplibre-gl";
 import { feature } from "topojson-client";
 import { countryByNumeric, COUNTRIES, type CountryEntry } from "@/data/countries";
 import { CATEGORIES } from "@/lib/entry";
@@ -48,7 +48,7 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
     let disposed = false;
     reduced.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     (async () => {
-      const [{ default: maplibregl }, topo] = await Promise.all([
+      const [maplibregl, topo] = await Promise.all([
         import("maplibre-gl"),
         fetch("/data/world-50m.json").then((r) => r.json()),
       ]);
@@ -169,7 +169,7 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
       const entryOf = (f?: MapGeoJSONFeature) =>
         f ? COUNTRIES.find((c) => c.code === (f.properties as { code?: string }).code) ?? null : null;
 
-      map.on("mousemove", "fill", (e) => {
+      map.on("mousemove", "fill", (e: { features?: MapGeoJSONFeature[]; point: { x: number; y: number } }) => {
         const f = e.features?.[0];
         const c = entryOf(f);
         setHoverId(c ? (f!.id as number) : null);
@@ -181,7 +181,7 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
         setHover(null);
         map.getCanvas().style.cursor = "";
       });
-      map.on("click", (e) => {
+      map.on("click", (e: { point: { x: number; y: number } }) => {
         const f = map.queryRenderedFeatures(e.point, { layers: ["fill"] })[0];
         onSelectRef.current(entryOf(f));
       });
@@ -255,7 +255,6 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
         },
       );
     }
-    (map.getSource("countries") as GeoJSONSource | undefined)?.triggerRepaint?.();
   }, [ready, selectedCode, filter]);
 
   useImperativeHandle(ref, () => ({
