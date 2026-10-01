@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Render map-label flags from the bundled `flag-icons` package rather than emoji so country markers remain consistent across platforms.
