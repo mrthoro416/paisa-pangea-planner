@@ -26,7 +26,6 @@ function cssVar(name: string) {
 interface Label {
   code: string;
   iso3: string;
-  flag: string;
   name: string;
   lng: number;
   lat: number;
@@ -70,7 +69,6 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
       labelData.current = COUNTRIES.filter((c) => c.lat != null && c.lng != null).map((c, i) => ({
         code: c.code,
         iso3: c.iso3,
-        flag: c.flag,
         name: c.name,
         lng: c.lng!,
         lat: c.lat!,
@@ -297,9 +295,11 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
             style={{ transform: `translate(${l.x}px, ${l.y}px) translate(-50%, -50%)`, left: 0, top: 0 }}
           >
             {l.mode === "code" ? (
-              <span className="text-[13px] leading-none" role="img" aria-label={`${l.name} flag`}>
-                {l.flag}
-              </span>
+              <span
+                className={`fi fi-${l.code.toLowerCase()} shrink-0 text-[12px] leading-none`}
+                role="img"
+                aria-label={`${l.name} flag`}
+              />
             ) : (
               <span className="size-1 rounded-full" style={{ background: l.color }} />
             )}
