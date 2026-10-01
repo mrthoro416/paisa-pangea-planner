@@ -26,6 +26,7 @@ function cssVar(name: string) {
 interface Label {
   code: string;
   iso3: string;
+  flag: string;
   name: string;
   lng: number;
   lat: number;
@@ -69,6 +70,7 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
       labelData.current = COUNTRIES.filter((c) => c.lat != null && c.lng != null).map((c, i) => ({
         code: c.code,
         iso3: c.iso3,
+        flag: c.flag,
         name: c.name,
         lng: c.lng!,
         lat: c.lat!,
@@ -206,7 +208,7 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
           if (Math.abs(dLng) > 80 || Math.abs(l.lat - c.lat) > 70) continue;
           const p = map.project([l.lng, l.lat]);
           if (p.x < 0 || p.y < 0 || p.x > width || p.y > height) continue;
-          const w = mode === "name" ? l.name.length * 6.6 + 16 : 40;
+          const w = mode === "name" ? l.name.length * 6.6 + 16 : 62;
           const box: [number, number, number, number] = [p.x - w / 2, p.y - 10, p.x + w / 2, p.y + 10];
           if (boxes.some((b) => !(box[2] < b[0] || box[0] > b[2] || box[3] < b[1] || box[1] > b[3]))) continue;
           boxes.push(box);
@@ -294,7 +296,13 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
             className="fade-in absolute flex items-center gap-1.5 whitespace-nowrap"
             style={{ transform: `translate(${l.x}px, ${l.y}px) translate(-50%, -50%)`, left: 0, top: 0 }}
           >
-            <span className="size-1 rounded-full" style={{ background: l.color }} />
+            {l.mode === "code" ? (
+              <span className="text-[13px] leading-none" role="img" aria-label={`${l.name} flag`}>
+                {l.flag}
+              </span>
+            ) : (
+              <span className="size-1 rounded-full" style={{ background: l.color }} />
+            )}
             <span
               className={l.mode === "code" ? "mono text-[9.5px] text-foreground/60" : "text-[11px] font-medium text-foreground/80"}
               style={{ textShadow: "0 1px 6px #08080a, 0 0 2px #08080a" }}
