@@ -58,6 +58,7 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
       maplibregl.setWorkerUrl(workerUrl);
 
       const fc = feature(topo, topo.objects.countries) as unknown as GeoJSON.FeatureCollection;
+      fc.features = fc.features.filter((f) => String(f.id) !== "010"); // Antarctica draws a seam on the globe
       fc.features.forEach((f, i) => {
         const entry = countryByNumeric.get(String(f.id ?? ""));
         f.id = i + 1;
@@ -118,7 +119,7 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
             "fill-opacity": [
               "case",
               ["boolean", ["feature-state", "selected"], false],
-              0.95,
+              0.82,
               ["boolean", ["feature-state", "dim"], false],
               0.07,
               ["boolean", ["feature-state", "hover"], false],
@@ -268,7 +269,7 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
       const mobile = window.innerWidth < 1024;
       map.flyTo({
         center: [c.lng, c.lat],
-        zoom: 3.6,
+        zoom: 3.2,
         duration: reduced.current ? 0 : 1800,
         curve: 1.5,
         padding: mobile ? { top: 0, bottom: window.innerHeight * 0.4, left: 0, right: 0 } : { right: 420, top: 0, bottom: 0, left: 0 },
