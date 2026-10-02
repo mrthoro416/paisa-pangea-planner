@@ -50,7 +50,9 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
   useEffect(() => {
     let disposed = false;
     reduced.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const isWebKit = /AppleWebKit/i.test(navigator.userAgent) && !/(Chrome|Chromium|Edg|OPR|CriOS|FxiOS)/i.test(navigator.userAgent);
+    const isAppleMobile = /iP(?:ad|hone|od)/i.test(navigator.userAgent);
+    const isDesktopSafari = /AppleWebKit/i.test(navigator.userAgent) && !/(Chrome|Chromium|Edg|OPR)/i.test(navigator.userAgent);
+    const isWebKit = isAppleMobile || isDesktopSafari;
     if (isWebKit) {
       setUseFallback(true);
       return () => {
