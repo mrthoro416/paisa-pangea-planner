@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 
 - Render map-label flags from the bundled `flag-icons` package rather than emoji so country markers remain consistent across platforms.
+- Use the SVG orthographic globe on Apple/WebKit browsers because MapLibre globe rendering can lose country layers there.

@@ -4,6 +4,7 @@ import { feature } from "topojson-client";
 import { countryByNumeric, COUNTRIES, type CountryEntry } from "@/data/countries";
 import { CATEGORIES } from "@/lib/entry";
 import { filterByKey, type FilterKey } from "@/lib/filters";
+import { CompatibleGlobeMap, type CompatibleGlobeHandle } from "@/components/CompatibleGlobeMap";
 
 export interface GlobeHandle {
   resetView: () => void;
@@ -35,7 +36,9 @@ interface Label {
 
 export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selectedCode, filter, onSelect }, ref) {
   const el = useRef<HTMLDivElement>(null);
+  const fallbackRef = useRef<CompatibleGlobeHandle>(null);
   const mapRef = useRef<MLMap | null>(null);
+  const [useFallback, setUseFallback] = useState(false);
   const [ready, setReady] = useState(false);
   const [labels, setLabels] = useState<Array<Label & { x: number; y: number; mode: "code" | "name" }>>([]);
   const [hover, setHover] = useState<{ x: number; y: number; c: CountryEntry } | null>(null);
@@ -47,6 +50,15 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
   useEffect(() => {
     let disposed = false;
     reduced.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const isAppleMobile = /iP(?:ad|hone|od)/i.test(navigator.userAgent);
+    const isDesktopSafari = /AppleWebKit/i.test(navigator.userAgent) && !/(Chrome|Chromium|Edg|OPR)/i.test(navigator.userAgent);
+    const isWebKit = isAppleMobile || isDesktopSafari;
+    if (isWebKit) {
+      setUseFallback(true);
+      return () => {
+        disposed = true;
+      };
+    }
     (async () => {
       const [maplibregl, workerUrl, topo] = await Promise.all([
         import("maplibre-gl"),
@@ -261,9 +273,18 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
   }, [ready, selectedCode, filter]);
 
   useImperativeHandle(ref, () => ({
-    resetView: () =>
-      mapRef.current?.flyTo({ ...HOME, duration: reduced.current ? 0 : 1600, essential: true }),
+    resetView: () => {
+      if (useFallback) {
+        fallbackRef.current?.resetView();
+        return;
+      }
+      mapRef.current?.flyTo({ ...HOME, duration: reduced.current ? 0 : 1600, essential: true });
+    },
     flyTo: (c) => {
+      if (useFallback) {
+        fallbackRef.current?.flyTo(c);
+        return;
+      }
       const map = mapRef.current;
       if (!map || c.lat == null || c.lng == null) return;
       const mobile = window.innerWidth < 1024;
@@ -276,7 +297,11 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
         essential: true,
       });
     },
-  }));
+  }), [useFallback]);
+
+  if (useFallback) {
+    return <CompatibleGlobeMap ref={fallbackRef} selectedCode={selectedCode} filter={filter} onSelect={onSelect} />;
+  }
 
   return (
     <div className="absolute inset-0">
