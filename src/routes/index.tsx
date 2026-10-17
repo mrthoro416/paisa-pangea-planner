@@ -82,7 +82,8 @@ function Index() {
           >
           ⌕ Search destinations
           <kbd className="mono rounded-full bg-accent px-2 py-1 text-faint">⌘K</kbd>
-        </button>
+          </button>
+        </div>
       </div>
 
       {/* Bottom controls — thumb zone */}
