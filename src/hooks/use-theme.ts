@@ -14,7 +14,14 @@ export function applyTheme(theme: Theme) {
 }
 
 export function useTheme() {
-  const [theme, setTheme] = useState<Theme>(getInitialTheme);
+  // Always start dark so SSR and the first client render match; the saved
+  // preference is applied after hydration (the inline script in __root
+  // already set the document class before paint).
+  const [theme, setTheme] = useState<Theme>("dark");
+
+  useEffect(() => {
+    setTheme(getInitialTheme());
+  }, []);
 
   useEffect(() => {
     applyTheme(theme);
