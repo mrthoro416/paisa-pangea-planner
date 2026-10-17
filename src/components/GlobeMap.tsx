@@ -94,7 +94,7 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
           version: 8,
           projection: { type: "globe" },
           sources: {},
-          layers: [{ id: "bg", type: "background", paint: { "background-color": "#08080a" } }],
+          layers: [{ id: "bg", type: "background", paint: { "background-color": cssVar("--background") } }],
           sky: {
             "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 0.6, 5, 0.2, 7, 0],
             "sky-color": "#08080a",
@@ -173,6 +173,21 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
         (map as unknown as { __fc: GeoJSON.FeatureCollection }).__fc = fc;
         if (!disposed) setReady(true);
         updateLabels();
+        // Some browsers/GPUs render only the atmosphere and drop the country
+        // layers. Verify the fill layer actually produced pixels; otherwise
+        // switch to the SVG globe.
+        map.once("idle", () => {
+          if (disposed) return;
+          const { width, height } = map.getContainer().getBoundingClientRect();
+          const rendered = map.queryRenderedFeatures(
+            [
+              [width * 0.25, height * 0.25],
+              [width * 0.75, height * 0.75],
+            ],
+            { layers: ["fill"] },
+          );
+          if (rendered.length === 0) setUseFallback(true);
+        });
       });
 
       let hoverId: number | null = null;
@@ -330,7 +345,7 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
             )}
             <span
               className={l.mode === "code" ? "mono text-[9.5px] text-foreground/60" : "text-[11px] font-medium text-foreground/80"}
-              style={{ textShadow: "0 1px 6px #08080a, 0 0 2px #08080a" }}
+              style={{ textShadow: "0 1px 6px var(--background), 0 0 2px var(--background)" }}
             >
               {l.mode === "code" ? l.iso3 : l.name}
             </span>
