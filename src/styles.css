@@ -92,6 +92,31 @@
   --glass: rgb(255 255 255 / 0.05);
 }
 
+:root.light {
+  --background: #f4f4f6;
+  --foreground: rgb(10 10 12 / 0.92);
+  --card: #ffffff;
+  --card-foreground: rgb(10 10 12 / 0.92);
+  --popover: #ffffff;
+  --popover-foreground: rgb(10 10 12 / 0.92);
+  --primary: rgb(10 10 12 / 0.92);
+  --primary-foreground: #f4f4f6;
+  --secondary: #eaeaee;
+  --secondary-foreground: rgb(10 10 12 / 0.92);
+  --muted: #e4e4e9;
+  --muted-foreground: rgb(10 10 12 / 0.55);
+  --faint: rgb(10 10 12 / 0.32);
+  --accent: rgb(10 10 12 / 0.06);
+  --accent-foreground: rgb(10 10 12 / 0.92);
+  --border: rgb(10 10 12 / 0.1);
+  --input: rgb(10 10 12 / 0.14);
+  --ring: rgb(10 10 12 / 0.45);
+
+  --ocean: #dedee4;
+  --land: #c4c4ce;
+  --glass: rgb(10 10 12 / 0.04);
+}
+
 @utility scrollbar-hide {
   scrollbar-width: none;
   &::-webkit-scrollbar {
@@ -156,7 +181,7 @@
 
 /* Frosted panel over the map */
 @utility map-overlay {
-  background: color-mix(in srgb, #121215 62%, transparent);
+  background: color-mix(in srgb, var(--card) 62%, transparent);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border: 1px solid var(--border);

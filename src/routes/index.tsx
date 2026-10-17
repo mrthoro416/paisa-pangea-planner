@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "@/hooks/use-theme";
 import { COUNTRIES, type CountryEntry } from "@/data/countries";
 import { FILTERS, filterByKey, isAccessible, type FilterKey } from "@/lib/filters";
 import { GlobeMap, type GlobeHandle } from "@/components/GlobeMap";
@@ -31,6 +33,7 @@ function Index() {
   const [filter, setFilter] = useState<FilterKey>("all");
   const [searchOpen, setSearchOpen] = useState(false);
   const globe = useRef<GlobeHandle>(null);
+  const { theme, toggle } = useTheme();
 
   const counts = useMemo(
     () => Object.fromEntries(FILTERS.map((f) => [f.key, COUNTRIES.filter(f.test).length])) as Record<FilterKey, number>,
@@ -53,7 +56,7 @@ function Index() {
   return (
     <div className="app-fixed bg-background">
       <h1 className="sr-only">Paisa Planner — entry requirements for Colombian passport holders</h1>
-      <GlobeMap ref={globe} selectedCode={selected?.code ?? null} filter={filter} onSelect={pick} />
+      <GlobeMap key={theme} ref={globe} selectedCode={selected?.code ?? null} filter={filter} onSelect={pick} />
 
       {/* Top HUD */}
       <div
@@ -63,14 +66,24 @@ function Index() {
         <div className="pointer-events-auto min-w-0">
           <PassportHUD count={hudCount} total={COUNTRIES.length} label={hudLabel} onReset={reset} />
         </div>
-        <button
-          type="button"
-          onClick={() => setSearchOpen(true)}
-          className="map-overlay pointer-events-auto hidden h-12 shrink-0 items-center gap-3 rounded-full pl-4 pr-2 text-sm text-muted-foreground transition-colors hover:text-foreground lg:flex"
-        >
+        <div className="pointer-events-auto flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={toggle}
+            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            className="map-overlay tap-target flex size-12 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
+          </button>
+          <button
+            type="button"
+            onClick={() => setSearchOpen(true)}
+            className="map-overlay hidden h-12 items-center gap-3 rounded-full pl-4 pr-2 text-sm text-muted-foreground transition-colors hover:text-foreground lg:flex"
+          >
           ⌕ Search destinations
           <kbd className="mono rounded-full bg-accent px-2 py-1 text-faint">⌘K</kbd>
-        </button>
+          </button>
+        </div>
       </div>
 
       {/* Bottom controls — thumb zone */}
