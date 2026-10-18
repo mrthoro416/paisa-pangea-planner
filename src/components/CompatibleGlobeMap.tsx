@@ -103,35 +103,95 @@ export const CompatibleGlobeMap = forwardRef<CompatibleGlobeHandle, Props>(funct
     }).slice(0, 42);
   }, [projection, size, zoom]);
 
+  const pointersRef = useRef(new Map<number, { x: number; y: number }>());
+  const pinchRef = useRef<{ dist: number; zoom: number; mx: number; my: number; rotation: [number, number] } | null>(null);
+  const zoomRef = useRef(zoom);
+  zoomRef.current = zoom;
+  const rotationRef = useRef(rotation);
+  rotationRef.current = rotation;
+
+  // (Re)anchor the gesture whenever the number of fingers changes, so nothing jumps.
+  const startGesture = () => {
+    const pts = [...pointersRef.current.values()];
+    if (pts.length >= 2) {
+      const [a, b] = pts;
+      if (!a || !b) return;
+      dragRef.current = null;
+      pinchRef.current = {
+        dist: Math.hypot(a.x - b.x, a.y - b.y) || 1,
+        zoom: zoomRef.current,
+        mx: (a.x + b.x) / 2,
+        my: (a.y + b.y) / 2,
+        rotation: rotationRef.current,
+      };
+    } else if (pts.length === 1 && pts[0]) {
+      pinchRef.current = null;
+      dragRef.current = { x: pts[0].x, y: pts[0].y, rotation: rotationRef.current };
+    } else {
+      pinchRef.current = null;
+      dragRef.current = null;
+    }
+  };
+  const endPointer = (id: number) => {
+    pointersRef.current.delete(id);
+    startGesture();
+  };
+
+  // Native non-passive wheel listener so trackpad pinch (ctrlKey) and scroll don't zoom/scroll the page.
+  useEffect(() => {
+    const node = containerRef.current;
+    if (!node) return;
+    const onWheel = (event: WheelEvent) => {
+      event.preventDefault();
+      const dy = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? 100 : 1);
+      const intensity = event.ctrlKey ? 0.01 : 0.0015;
+      setZoom((value) => Math.min(3.2, Math.max(0.8, value * Math.exp(-dy * intensity))));
+    };
+    node.addEventListener("wheel", onWheel, { passive: false });
+    return () => node.removeEventListener("wheel", onWheel);
+  }, []);
+
   return (
     <div
       ref={containerRef}
       className="absolute inset-0 touch-none overflow-hidden"
       role="application"
       aria-label="Interactive globe of entry requirements for Colombian passport holders"
-      onWheel={(event) => {
-        event.preventDefault();
-        setZoom((value) => Math.min(3.2, Math.max(0.8, value * (event.deltaY > 0 ? 0.9 : 1.1))));
-      }}
       onPointerDown={(event) => {
         event.currentTarget.setPointerCapture(event.pointerId);
-        dragRef.current = { x: event.clientX, y: event.clientY, rotation };
+        pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+        startGesture();
       }}
       onPointerMove={(event) => {
+        const pts = pointersRef.current;
+        if (!pts.has(event.pointerId)) return;
+        pts.set(event.pointerId, { x: event.clientX, y: event.clientY });
+        const pinch = pinchRef.current;
+        if (pinch && pts.size >= 2) {
+          const [a, b] = [...pts.values()];
+          if (!a || !b) return;
+          const dist = Math.hypot(a.x - b.x, a.y - b.y) || 1;
+          const nextZoom = Math.min(3.2, Math.max(0.8, pinch.zoom * (dist / pinch.dist)));
+          const mx = (a.x + b.x) / 2;
+          const my = (a.y + b.y) / 2;
+          const sensitivity = 0.28 / nextZoom;
+          setZoom(nextZoom);
+          setRotation([
+            pinch.rotation[0] + (mx - pinch.mx) * sensitivity,
+            Math.max(-75, Math.min(75, pinch.rotation[1] - (my - pinch.my) * sensitivity)),
+          ]);
+          return;
+        }
         const drag = dragRef.current;
         if (!drag) return;
-        const sensitivity = 0.28 / zoom;
+        const sensitivity = 0.28 / zoomRef.current;
         setRotation([
           drag.rotation[0] + (event.clientX - drag.x) * sensitivity,
           Math.max(-75, Math.min(75, drag.rotation[1] - (event.clientY - drag.y) * sensitivity)),
         ]);
       }}
-      onPointerUp={() => {
-        dragRef.current = null;
-      }}
-      onPointerCancel={() => {
-        dragRef.current = null;
-      }}
+      onPointerUp={(event) => endPointer(event.pointerId)}
+      onPointerCancel={(event) => endPointer(event.pointerId)}
     >
       <svg className="size-full" viewBox={`0 0 ${size.width} ${size.height}`} aria-hidden="true">
         <defs>
