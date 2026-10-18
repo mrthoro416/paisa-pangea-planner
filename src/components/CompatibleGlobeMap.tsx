@@ -4,6 +4,7 @@ import { feature } from "topojson-client";
 import { countryByNumeric, COUNTRIES, type CountryEntry } from "@/data/countries";
 import { CATEGORIES } from "@/lib/entry";
 import { filterByKey, type FilterKey } from "@/lib/filters";
+import { matchesVibe, type VibeKey } from "@/lib/vibes";
 
 export interface CompatibleGlobeHandle {
   resetView: () => void;
@@ -13,6 +14,7 @@ export interface CompatibleGlobeHandle {
 interface Props {
   selectedCode: string | null;
   filter: FilterKey;
+  vibe?: VibeKey | null;
   onSelect: (country: CountryEntry | null) => void;
 }
 
@@ -21,7 +23,7 @@ type WorldFeature = GeoJSON.Feature<GeoJSON.Geometry, { code?: string; category?
 const HOME_ROTATION: [number, number] = [40, -12];
 
 export const CompatibleGlobeMap = forwardRef<CompatibleGlobeHandle, Props>(function CompatibleGlobeMap(
-  { selectedCode, filter, onSelect },
+  { selectedCode, filter, vibe = null, onSelect },
   ref,
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -217,7 +219,7 @@ export const CompatibleGlobeMap = forwardRef<CompatibleGlobeHandle, Props>(funct
           const code = item.properties.code ?? "";
           const country = code ? COUNTRIES.find((entry) => entry.code === code) : undefined;
           const selected = code !== "" && code === selectedCode;
-          const dimmed = filter !== "all" && (!country || !activeTest(country));
+          const dimmed = (filter !== "all" || vibe != null) && (!country || !activeTest(country) || !matchesVibe(country, vibe));
           const category = country?.category;
           const d = path(item);
           if (!d) return null;
