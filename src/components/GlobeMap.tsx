@@ -120,8 +120,9 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
       const watchdog = window.setTimeout(() => {
         if (!loaded && !disposed) setUseFallback(true);
       }, 4000);
-      map.on("error", (e: { error?: Error }) => {
-        if (!loaded && !disposed && /worker|webgl|shader/i.test(String(e.error?.message ?? ""))) setUseFallback(true);
+      map.on("error", (e) => {
+        const msg = String((e as unknown as { error?: Error }).error?.message ?? "");
+        if (!loaded && !disposed && /worker|webgl|shader/i.test(msg)) setUseFallback(true);
       });
 
       map.on("load", () => {
