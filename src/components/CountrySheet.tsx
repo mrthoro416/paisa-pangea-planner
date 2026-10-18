@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useAnimationControls, type PanInfo } from "mot
 import { PASSPORT, type CountryEntry } from "@/data/countries";
 import { categoryMeta, maxStayText, officialSource, requirementItems, requirementSummary } from "@/lib/entry";
 import { formatVerified } from "@/lib/filters";
+import { ClimateCard } from "@/components/ClimateCard";
 
 interface Props {
   country: CountryEntry | null;
@@ -145,6 +146,8 @@ function Content({ country, onClose }: { country: CountryEntry; onClose: () => v
         <Row k="Stay" v={stay?.replace("Up to ", "") ?? "Varies"} />
         <Row k="Passport" v={`${PASSPORT.flag} ${PASSPORT.name}`} />
       </Section>
+
+      <ClimateCard code={country.code} name={country.name} />
 
       {country.note && (
         <p className="mt-5 rounded-2xl bg-beacon-soft p-4 text-sm leading-relaxed text-foreground/90">{country.note}</p>

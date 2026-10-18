@@ -5,6 +5,7 @@ import { countryByNumeric, COUNTRIES, type CountryEntry } from "@/data/countries
 import { CATEGORIES } from "@/lib/entry";
 import { filterByKey, type FilterKey } from "@/lib/filters";
 import { CompatibleGlobeMap, type CompatibleGlobeHandle } from "@/components/CompatibleGlobeMap";
+import { matchesVibe, type VibeKey } from "@/lib/vibes";
 
 export interface GlobeHandle {
   resetView: () => void;
@@ -14,6 +15,7 @@ export interface GlobeHandle {
 interface Props {
   selectedCode: string | null;
   filter: FilterKey;
+  vibe?: VibeKey | null;
   onSelect: (c: CountryEntry | null) => void;
 }
 
@@ -34,7 +36,7 @@ interface Label {
   rank: number;
 }
 
-export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selectedCode, filter, onSelect }, ref) {
+export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selectedCode, filter, vibe, onSelect }, ref) {
   const el = useRef<HTMLDivElement>(null);
   const fallbackRef = useRef<CompatibleGlobeHandle>(null);
   const mapRef = useRef<MLMap | null>(null);
@@ -294,11 +296,11 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
         { source: "countries", id: f.id as number },
         {
           selected: code !== "" && code === selectedCode,
-          dim: filter !== "all" && (!entry || !test(entry)),
+          dim: (filter !== "all" || vibe != null) && (!entry || !test(entry) || !matchesVibe(entry, vibe ?? null)),
         },
       );
     }
-  }, [ready, selectedCode, filter]);
+  }, [ready, selectedCode, filter, vibe]);
 
   useImperativeHandle(ref, () => ({
     resetView: () => {
