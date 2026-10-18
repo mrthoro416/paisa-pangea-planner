@@ -62,7 +62,8 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
     (async () => {
       const [maplibregl, workerUrl, topo] = await Promise.all([
         import("maplibre-gl"),
-        import("maplibre-gl/dist/maplibre-gl-worker.mjs?url").then((m) => m.default as string),
+        // ?worker&url bundles the worker with its shared chunk so production never 404s.
+        import("maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url").then((m) => m.default as string),
         fetch("/data/world-50m.json").then((r) => r.json()),
       ]);
       await import("maplibre-gl/dist/maplibre-gl.css");
@@ -114,7 +115,18 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
       map.touchZoomRotate.disableRotation();
       mapRef.current = map;
 
+      // Watchdog: if the 3D globe never finishes loading (worker/WebGL failure), use the SVG globe.
+      let loaded = false;
+      const watchdog = window.setTimeout(() => {
+        if (!loaded && !disposed) setUseFallback(true);
+      }, 4000);
+      map.on("error", (e: { error?: Error }) => {
+        if (!loaded && !disposed && /worker|webgl|shader/i.test(String(e.error?.message ?? ""))) setUseFallback(true);
+      });
+
       map.on("load", () => {
+        loaded = true;
+        window.clearTimeout(watchdog);
         map.addSource("countries", { type: "geojson", data: fc });
         const catColor = [
           "match",
