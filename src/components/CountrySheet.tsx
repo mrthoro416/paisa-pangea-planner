@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useAnimationControls, type PanInfo } from "motion/react";
 import { PASSPORT, type CountryEntry } from "@/data/countries";
-import { categoryMeta, maxStayText, officialSource, requirementItems, requirementSummary } from "@/lib/entry";
+import { isHomeCountry, categoryMeta, maxStayText, officialSource, requirementItems, requirementSummary } from "@/lib/entry";
 import { formatVerified } from "@/lib/filters";
 import { ClimateCard } from "@/components/ClimateCard";
 
@@ -102,6 +102,7 @@ function MobileSheet({ country, onClose }: { country: CountryEntry; onClose: () 
 }
 
 function Content({ country, onClose }: { country: CountryEntry; onClose: () => void }) {
+  if (isHomeCountry(country)) return <HomeContent country={country} onClose={onClose} />;
   const meta = categoryMeta(country);
   const stay = maxStayText(country);
   const source = officialSource(country);
@@ -207,6 +208,38 @@ function Row({ k, v, mono }: { k: string; v: string; mono?: boolean }) {
     <div className="flex items-center justify-between gap-4 py-3">
       <span className="text-sm text-muted-foreground">{k}</span>
       <span className={mono ? "mono text-foreground/85" : "text-sm text-foreground"}>{v}</span>
+    </div>
+  );
+}
+
+function HomeContent({ country, onClose }: { country: CountryEntry; onClose: () => void }) {
+  return (
+    <div className="px-6 pb-[max(env(safe-area-inset-bottom),1.5rem)] pt-3 lg:pt-7">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="mono text-faint">{country.iso3} · {country.region}</p>
+          <h2 className="masthead mt-1 truncate text-[28px] leading-tight text-foreground">
+            <span className="mr-2" aria-hidden>{country.flag}</span>
+            {country.name}
+          </h2>
+        </div>
+        <button type="button" onClick={onClose} aria-label="Close" className="tap-target -mr-2 flex shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">✕</button>
+      </div>
+      <div className="mt-3">
+        <span className="mono inline-flex items-center gap-2 rounded-full bg-beacon-soft px-2.5 py-1.5 text-beacon">
+          <span className="size-1.5 rounded-full bg-beacon" aria-hidden />
+          Home country
+        </span>
+      </div>
+      <p className="mt-5 text-[15px] leading-relaxed text-foreground/80">
+        This is the passport's home country. {PASSPORT.name} citizens don't need a visa to enter or stay.
+      </p>
+      <Section title="Entry">
+        <Row k="Type" v="Citizen — no visa" />
+        <Row k="Stay" v="No limit" />
+        <Row k="Passport" v={`${PASSPORT.flag} ${PASSPORT.name}`} />
+      </Section>
+      <ClimateCard code={country.code} name={country.name} />
     </div>
   );
 }

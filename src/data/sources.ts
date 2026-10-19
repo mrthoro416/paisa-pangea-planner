@@ -40,7 +40,7 @@ export const OFFICIAL_SOURCES: Record<string, OfficialSource> = {
   PH: { url: "https://immigration.gov.ph/", label: "Bureau of Immigration" },
   AE: { url: "https://icp.gov.ae/en/", label: "UAE Federal Authority for Identity & Citizenship" },
   EG: { url: "https://visa2egypt.gov.eg/", label: "Egypt e-Visa Portal" },
-  LKA: { url: "https://www.srilankaevisa.lk/", label: "Sri Lanka eVisa (official portal)" },
+  LK: { url: "https://www.srilankaevisa.lk/", label: "Sri Lanka eVisa (official portal)" },
   NP: { url: "https://nepaliport.immigration.gov.np/", label: "Nepal Immigration — NepaliPort" },
   KH: { url: "https://www.evisa.gov.kh/", label: "Cambodia eVisa (Ministry of Foreign Affairs)" },
   MM: { url: "https://evisa.moip.gov.mm/", label: "Myanmar eVisa (official portal)" },
