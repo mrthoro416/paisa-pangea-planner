@@ -1,3 +1,4 @@
+import { isHomeCountry } from "@/lib/entry";
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import type { Map as MLMap, MapGeoJSONFeature } from "maplibre-gl";
 import { feature } from "topojson-client";
@@ -77,17 +78,17 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
       fc.features.forEach((f, i) => {
         const entry = countryByNumeric.get(String(f.id ?? ""));
         f.id = i + 1;
-        f.properties = { code: entry?.code ?? "", cat: entry?.category ?? "none" };
+        f.properties = { code: entry?.code ?? "", cat: entry ? (isHomeCountry(entry) ? "home" : entry.category) : "none" };
       });
 
-      const colors = Object.fromEntries(Object.values(CATEGORIES).map((m) => [m.key, cssVar(m.colorVar)]));
+      const colors: Record<string, string> = { ...Object.fromEntries(Object.values(CATEGORIES).map((m) => [m.key, cssVar(m.colorVar)])), home: "#e8c25a" };
       labelData.current = COUNTRIES.filter((c) => c.lat != null && c.lng != null).map((c, i) => ({
         code: c.code,
         iso3: c.iso3,
         name: c.name,
         lng: c.lng!,
         lat: c.lat!,
-        color: colors[c.category] ?? "#fff",
+        color: (isHomeCountry(c) ? colors.home : colors[c.category]) ?? "#fff",
         rank: i,
       }));
 
@@ -330,7 +331,7 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
   }), [useFallback]);
 
   if (useFallback) {
-    return <CompatibleGlobeMap ref={fallbackRef} selectedCode={selectedCode} filter={filter} onSelect={onSelect} />;
+    return <CompatibleGlobeMap ref={fallbackRef} selectedCode={selectedCode} filter={filter} vibe={vibe} onSelect={onSelect} />;
   }
 
   return (

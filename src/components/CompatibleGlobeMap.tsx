@@ -1,3 +1,4 @@
+import { isHomeCountry } from "@/lib/entry";
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { geoOrthographic, geoPath } from "d3-geo";
 import { feature } from "topojson-client";
@@ -227,7 +228,7 @@ export const CompatibleGlobeMap = forwardRef<CompatibleGlobeHandle, Props>(funct
             <path
               key={`${code}-${index}`}
               d={d}
-              fill={category ? `var(${CATEGORIES[category].colorVar})` : "var(--land)"}
+              fill={country && isHomeCountry(country) ? "var(--beacon)" : category ? `var(${CATEGORIES[category].colorVar})` : "var(--land)"}
               fillOpacity={selected ? 0.9 : dimmed ? 0.08 : category ? 0.62 : 0.45}
               stroke={selected ? "var(--foreground)" : "var(--background)"}
               strokeOpacity={selected ? 0.95 : 0.8}

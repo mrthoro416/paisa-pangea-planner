@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
-import { Landmark, MountainSnow, Moon, Palmtree, Sun, Trees } from "lucide-react";
+import { Drama, MountainSnow, Moon, Palmtree, Sun, Trees } from "lucide-react";
 import { VIBES, type VibeKey } from "@/lib/vibes";
 
-const VIBE_ICONS = { beach: Palmtree, ski: MountainSnow, culture: Landmark, nature: Trees } as const;
+const VIBE_ICONS = { beach: Palmtree, ski: MountainSnow, culture: Drama, nature: Trees } as const;
 import { useTheme } from "@/hooks/use-theme";
 import { COUNTRIES, type CountryEntry } from "@/data/countries";
 import { FILTERS, filterByKey, isAccessible, type FilterKey } from "@/lib/filters";

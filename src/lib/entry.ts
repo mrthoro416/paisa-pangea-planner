@@ -1,4 +1,4 @@
-import type { CountryEntry, EntryCategory } from "@/data/countries";
+import { PASSPORT, type CountryEntry, type EntryCategory } from "@/data/countries";
 import { OFFICIAL_SOURCES, type OfficialSource } from "@/data/sources";
 
 export const CATEGORY_ORDER: EntryCategory[] = [
@@ -127,4 +127,9 @@ export function requirementSummary(c: CountryEntry): string {
 
 export function officialSource(c: CountryEntry): OfficialSource | null {
   return OFFICIAL_SOURCES[c.code] ?? null;
+}
+
+/** The passport's own country: citizens enter freely, so it is never a visa destination. */
+export function isHomeCountry(c: CountryEntry) {
+  return c.code === PASSPORT.code;
 }
