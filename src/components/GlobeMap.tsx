@@ -88,7 +88,7 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
         name: c.name,
         lng: c.lng!,
         lat: c.lat!,
-        color: (isHomeCountry(c) ? colors.home : colors[c.category]) ?? "#fff",
+        color: (isHomeCountry(c) ? colors["home"] : colors[c.category]) ?? "#fff",
         rank: i,
       }));
 
@@ -331,7 +331,7 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
   }), [useFallback]);
 
   if (useFallback) {
-    return <CompatibleGlobeMap ref={fallbackRef} selectedCode={selectedCode} filter={filter} vibe={vibe} onSelect={onSelect} />;
+    return <CompatibleGlobeMap ref={fallbackRef} selectedCode={selectedCode} filter={filter} vibe={vibe ?? null} onSelect={onSelect} />;
   }
 
   return (
