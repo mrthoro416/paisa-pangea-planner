@@ -1,5 +1,5 @@
 // Paisa Planner service worker — offline-capable app shell.
-const VERSION = "paisa-v4";
+const VERSION = "paisa-v5";
 const SHELL = [
   "/",
   "/about",
