@@ -1,6 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
-import { Moon, Sun } from "lucide-react";
+import { Landmark, MountainSnow, Moon, Palmtree, Sun, Trees } from "lucide-react";
+import { VIBES, type VibeKey } from "@/lib/vibes";
+
+const VIBE_ICONS = { beach: Palmtree, ski: MountainSnow, culture: Landmark, nature: Trees } as const;
 import { useTheme } from "@/hooks/use-theme";
 import { COUNTRIES, type CountryEntry } from "@/data/countries";
 import { FILTERS, filterByKey, isAccessible, type FilterKey } from "@/lib/filters";
@@ -31,6 +34,7 @@ export const Route = createFileRoute("/")({
 function Index() {
   const [selected, setSelected] = useState<CountryEntry | null>(null);
   const [filter, setFilter] = useState<FilterKey>("all");
+  const [vibe, setVibe] = useState<VibeKey | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const globe = useRef<GlobeHandle>(null);
   const { theme, toggle } = useTheme();
@@ -46,6 +50,7 @@ function Index() {
   const reset = () => {
     setSelected(null);
     setFilter("all");
+    setVibe(null);
     globe.current?.resetView();
   };
   const pick = (c: CountryEntry | null) => {
@@ -56,7 +61,7 @@ function Index() {
   return (
     <div className="app-fixed bg-background">
       <h1 className="sr-only">Paisa Planner — entry requirements for Colombian passport holders</h1>
-      <GlobeMap key={theme} ref={globe} selectedCode={selected?.code ?? null} filter={filter} onSelect={pick} />
+      <GlobeMap key={theme} ref={globe} selectedCode={selected?.code ?? null} filter={filter} vibe={vibe} onSelect={pick} />
 
       {/* Top HUD */}
       <div
@@ -94,13 +99,36 @@ function Index() {
         <div className="w-full max-w-full lg:w-auto lg:max-w-[calc(100vw-460px)]">
           <FilterBar value={filter} counts={counts} onChange={setFilter} />
         </div>
-        <button
-          type="button"
-          onClick={() => setSearchOpen(true)}
-          className="map-overlay flex h-14 w-full items-center gap-3 rounded-full px-5 text-[16px] text-muted-foreground transition-transform active:scale-[0.98] lg:hidden"
-        >
-          <span aria-hidden>⌕</span> Where to?
-        </button>
+        <div className="map-overlay flex h-14 w-full items-center rounded-full pl-5 pr-1.5 lg:w-auto lg:pl-1.5">
+          <button
+            type="button"
+            onClick={() => setSearchOpen(true)}
+            className="flex h-full min-w-0 flex-1 items-center gap-3 text-[16px] text-muted-foreground lg:hidden"
+          >
+            <span aria-hidden>⌕</span> Where to?
+          </button>
+          <div role="group" aria-label="Holiday style" className="flex items-center gap-0.5">
+            {VIBES.map((v) => {
+              const Icon = VIBE_ICONS[v.key];
+              const on = vibe === v.key;
+              return (
+                <button
+                  key={v.key}
+                  type="button"
+                  aria-pressed={on}
+                  aria-label={`${v.label} destinations`}
+                  title={v.label}
+                  onClick={() => setVibe(on ? null : v.key)}
+                  className={`flex size-11 items-center justify-center rounded-full transition-all active:scale-90 ${
+                    on ? "bg-foreground text-background" : "text-faint hover:text-foreground"
+                  }`}
+                >
+                  <Icon className="size-[18px]" strokeWidth={1.75} />
+                </button>
+              );
+            })}
+          </div>
+        </div>
         <a href="/about" className="mono hidden text-faint hover:text-muted-foreground lg:block">
           Data & sources
         </a>
