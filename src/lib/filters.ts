@@ -35,10 +35,11 @@ export function isAccessible(c: CountryEntry) {
   return !isHomeCountry(c) && c.category !== "visa_required";
 }
 
-export function formatVerified(iso: string) {
+export function formatVerified(iso: string, lang: "en" | "es" = "en") {
   const d = new Date(iso + "T00:00:00Z");
   if (Number.isNaN(d.getTime())) return iso;
   return d
-    .toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" })
+    .toLocaleDateString(lang === "es" ? "es-CO" : "en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" })
+    .replace(/\./g, "")
     .toUpperCase();
 }
