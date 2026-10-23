@@ -40,6 +40,7 @@ const ES: Record<string, string> = {
   "Holiday style": "Tipo de viaje",
   // Home / HUD
   "without embassy visa": "sin visa de embajada",
+  "On arrival ": "a la llegada",
   passport: "pasaporte",
   verified: "verificado",
   "Paisa Planner — reset globe and start over": "Paisa Planner: reiniciar el globo",
