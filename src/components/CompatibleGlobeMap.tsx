@@ -159,7 +159,7 @@ export const CompatibleGlobeMap = forwardRef<CompatibleGlobeHandle, Props>(funct
       ref={containerRef}
       className="absolute inset-0 touch-none overflow-hidden"
       role="application"
-      aria-label="Interactive globe of entry requirements for Colombian passport holders"
+      aria-label={t("Interactive globe of entry requirements for Colombian passport holders")}
       onPointerDown={(event) => {
         event.currentTarget.setPointerCapture(event.pointerId);
         pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });

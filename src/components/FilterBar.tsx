@@ -1,6 +1,7 @@
 import { FILTERS, type FilterKey } from "@/lib/filters";
 import { CATEGORIES } from "@/lib/entry";
 import type { EntryCategory } from "@/data/countries";
+import { useLang } from "@/lib/i18n";
 
 interface Props {
   value: FilterKey;
@@ -9,10 +10,11 @@ interface Props {
 }
 
 export function FilterBar({ value, counts, onChange }: Props) {
+  const { t } = useLang();
   return (
     <div
       role="radiogroup"
-      aria-label="Filter destinations"
+      aria-label={t("Filter destinations")}
       className="map-overlay scrollbar-hide flex max-w-full gap-0.5 overflow-x-auto rounded-full p-1"
     >
       {FILTERS.map((f) => {
@@ -30,7 +32,7 @@ export function FilterBar({ value, counts, onChange }: Props) {
             }`}
           >
             {cat && <span className="size-1.5 rounded-full" style={{ background: `var(${cat.colorVar})` }} aria-hidden />}
-            {f.label}
+            {t(f.label)}
             <span className={`mono text-[9.5px] ${active ? "text-background/60" : "text-faint"}`}>{counts[f.key]}</span>
           </button>
         );

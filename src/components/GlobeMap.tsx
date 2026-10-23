@@ -341,7 +341,7 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
         className="inset-0"
         style={{ position: "absolute", inset: 0 }}
         role="application"
-        aria-label="Interactive globe of entry requirements for Colombian passport holders"
+        aria-label={t("Interactive globe of entry requirements for Colombian passport holders")}
       />
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
         {labels.map((l) => (
@@ -354,7 +354,7 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
               <span
                 className={`fi fi-${l.code.toLowerCase()} shrink-0 text-[12px] leading-none`}
                 role="img"
-                aria-label={`${l.name} flag`}
+                aria-label={`${name(l)} flag`}
               />
             ) : (
               <span className="size-1 rounded-full" style={{ background: l.color }} />
@@ -363,7 +363,7 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
               className={l.mode === "code" ? "mono text-[9.5px] text-foreground/60" : "text-[11px] font-medium text-foreground/80"}
               style={{ textShadow: "0 1px 6px var(--background), 0 0 2px var(--background)" }}
             >
-              {l.mode === "code" ? l.iso3 : l.name}
+              {l.mode === "code" ? l.iso3 : name(l)}
             </span>
           </div>
         ))}
@@ -374,11 +374,11 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
           style={{ left: hover.x + 14, top: hover.y + 14 }}
         >
           <p className="text-[13px] font-medium text-foreground">
-            {hover.c.flag} {hover.c.name}
+            {hover.c.flag} {name(hover.c)}
           </p>
           <p className="mono mt-0.5" style={{ color: `var(${CATEGORIES[hover.c.category].colorVar})` }}>
-            {CATEGORIES[hover.c.category].label}
-            {hover.c.maxStayDays ? ` · ${hover.c.maxStayDays} days` : ""}
+            {t(CATEGORIES[hover.c.category].label)}
+            {hover.c.maxStayDays ? ` · ${hover.c.maxStayDays} ${t("days")}` : ""}
           </p>
         </div>
       )}
