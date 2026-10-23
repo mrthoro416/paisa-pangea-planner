@@ -5,6 +5,7 @@ import { feature } from "topojson-client";
 import { countryByNumeric, COUNTRIES, type CountryEntry } from "@/data/countries";
 import { CATEGORIES } from "@/lib/entry";
 import { filterByKey, type FilterKey } from "@/lib/filters";
+import { useLang } from "@/lib/i18n";
 import { matchesVibe, type VibeKey } from "@/lib/vibes";
 
 export interface CompatibleGlobeHandle {
@@ -29,6 +30,7 @@ export const CompatibleGlobeMap = forwardRef<CompatibleGlobeHandle, Props>(funct
 ) {
   const containerRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{ x: number; y: number; rotation: [number, number] } | null>(null);
+  const { t, name } = useLang();
   const [size, setSize] = useState({ width: 800, height: 600 });
   const [features, setFeatures] = useState<WorldFeature[]>([]);
   const [rotation, setRotation] = useState<[number, number]>(HOME_ROTATION);

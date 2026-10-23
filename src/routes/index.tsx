@@ -5,6 +5,8 @@ import { VIBES, type VibeKey } from "@/lib/vibes";
 
 const VIBE_ICONS = { beach: Palmtree, ski: MountainSnow, culture: Drama, nature: Trees } as const;
 import { useTheme } from "@/hooks/use-theme";
+import { useLang } from "@/lib/i18n";
+import { LanguagePrompt } from "@/components/LanguagePrompt";
 import { COUNTRIES, type CountryEntry } from "@/data/countries";
 import { FILTERS, filterByKey, isAccessible, type FilterKey } from "@/lib/filters";
 import { GlobeMap, type GlobeHandle } from "@/components/GlobeMap";
@@ -38,6 +40,7 @@ function Index() {
   const [searchOpen, setSearchOpen] = useState(false);
   const globe = useRef<GlobeHandle>(null);
   const { theme, toggle } = useTheme();
+  const { lang, setLang, t } = useLang();
 
   const counts = useMemo(
     () => Object.fromEntries(FILTERS.map((f) => [f.key, COUNTRIES.filter(f.test).length])) as Record<FilterKey, number>,
@@ -45,7 +48,7 @@ function Index() {
   );
   const accessible = useMemo(() => COUNTRIES.filter(isAccessible).length, []);
   const hudCount = filter === "all" ? accessible : counts[filter];
-  const hudLabel = filter === "all" ? "without embassy visa" : filterByKey.get(filter)!.label.toLowerCase();
+  const hudLabel = filter === "all" ? "without embassy visa" : filterByKey.get(filter)!.label;
 
   const reset = () => {
     setSelected(null);
@@ -74,8 +77,18 @@ function Index() {
         <div className="pointer-events-auto flex shrink-0 items-center gap-2">
           <button
             type="button"
+            onClick={() => setLang(lang === "en" ? "es" : "en")}
+            aria-label={t("Switch to Spanish")}
+            title={lang === "en" ? "Español" : "English"}
+            className="map-overlay tap-target flex h-12 items-center gap-2 rounded-full px-3.5 text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <span className={`fi fi-${lang === "en" ? "us" : "co"} rounded-[2px] text-[15px]`} aria-hidden />
+            <span className="mono text-foreground/80">{lang === "en" ? "EN" : "ES"}</span>
+          </button>
+          <button
+            type="button"
             onClick={toggle}
-            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            aria-label={t(theme === "dark" ? "Switch to light mode" : "Switch to dark mode")}
             className="map-overlay tap-target flex size-12 items-center justify-center rounded-full text-muted-foreground transition-colors hover:text-foreground"
           >
             {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
@@ -85,7 +98,7 @@ function Index() {
             onClick={() => setSearchOpen(true)}
             className="map-overlay hidden h-12 items-center gap-3 rounded-full pl-4 pr-2 text-sm text-muted-foreground transition-colors hover:text-foreground lg:flex"
           >
-          ⌕ Search destinations
+          ⌕ {t("Search destinations")}
           <kbd className="mono rounded-full bg-accent px-2 py-1 text-faint">⌘K</kbd>
           </button>
         </div>
@@ -105,9 +118,9 @@ function Index() {
             onClick={() => setSearchOpen(true)}
             className="flex h-full min-w-0 flex-1 items-center gap-3 text-[16px] text-muted-foreground lg:hidden"
           >
-            <span aria-hidden>⌕</span> Where to?
+            <span aria-hidden>⌕</span> {t("Where to?")}
           </button>
-          <div role="group" aria-label="Holiday style" className="flex items-center gap-0.5">
+          <div role="group" aria-label={t("Holiday style")} className="flex items-center gap-0.5">
             {VIBES.map((v) => {
               const Icon = VIBE_ICONS[v.key];
               const on = vibe === v.key;
@@ -116,8 +129,8 @@ function Index() {
                   key={v.key}
                   type="button"
                   aria-pressed={on}
-                  aria-label={`${v.label} destinations`}
-                  title={v.label}
+                  aria-label={t(v.label)}
+                  title={t(v.label)}
                   onClick={() => setVibe(on ? null : v.key)}
                   className={`flex size-11 items-center justify-center rounded-full transition-all active:scale-90 ${
                     on ? "bg-foreground text-background" : "text-faint hover:text-foreground"
@@ -130,7 +143,7 @@ function Index() {
           </div>
         </div>
         <a href="/about" className="mono hidden text-faint hover:text-muted-foreground lg:block">
-          Data & sources
+          {t("Data & sources")}
         </a>
       </div>
 
@@ -144,6 +157,7 @@ function Index() {
         }}
       />
       <CountrySheet country={selected} onClose={() => setSelected(null)} />
+      <LanguagePrompt />
     </div>
   );
 }

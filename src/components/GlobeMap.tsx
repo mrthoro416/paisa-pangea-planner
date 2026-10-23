@@ -6,6 +6,7 @@ import { countryByNumeric, COUNTRIES, type CountryEntry } from "@/data/countries
 import { CATEGORIES } from "@/lib/entry";
 import { filterByKey, type FilterKey } from "@/lib/filters";
 import { CompatibleGlobeMap, type CompatibleGlobeHandle } from "@/components/CompatibleGlobeMap";
+import { useLang } from "@/lib/i18n";
 import { matchesVibe, type VibeKey } from "@/lib/vibes";
 
 export interface GlobeHandle {
@@ -43,6 +44,7 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
   const mapRef = useRef<MLMap | null>(null);
   const [useFallback, setUseFallback] = useState(false);
   const [ready, setReady] = useState(false);
+  const { t, name } = useLang();
   const [labels, setLabels] = useState<Array<Label & { x: number; y: number; mode: "code" | "name" }>>([]);
   const [hover, setHover] = useState<{ x: number; y: number; c: CountryEntry } | null>(null);
   const onSelectRef = useRef(onSelect);
