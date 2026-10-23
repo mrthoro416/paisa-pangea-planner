@@ -109,6 +109,9 @@ export const CompatibleGlobeMap = forwardRef<CompatibleGlobeHandle, Props>(funct
   }, [projection, size, zoom]);
 
   const pointersRef = useRef(new Map<number, { x: number; y: number }>());
+  // Pointer capture retargets clicks to the container. Resolve a stationary
+  // press ourselves, and never select after dragging or a multi-touch gesture.
+  const pressRef = useRef<{ id: number; x: number; y: number; code: string; moved: boolean } | null>(null);
   const pinchRef = useRef<{ dist: number; zoom: number; mx: number; my: number; rotation: [number, number] } | null>(null);
   const zoomRef = useRef(zoom);
   zoomRef.current = zoom;
@@ -163,6 +166,19 @@ export const CompatibleGlobeMap = forwardRef<CompatibleGlobeHandle, Props>(funct
       role="application"
       aria-label={t("Interactive globe of entry requirements for Colombian passport holders")}
       onPointerDown={(event) => {
+        if (event.pointerType === "mouse" && event.button !== 0) return;
+        const target = event.target instanceof Element ? event.target.closest("[data-country-code]") : null;
+        if (pointersRef.current.size === 0) {
+          pressRef.current = {
+            id: event.pointerId,
+            x: event.clientX,
+            y: event.clientY,
+            code: target?.getAttribute("data-country-code") ?? "",
+            moved: false,
+          };
+        } else {
+          pressRef.current = null;
+        }
         event.currentTarget.setPointerCapture(event.pointerId);
         pointersRef.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
         startGesture();
@@ -170,6 +186,10 @@ export const CompatibleGlobeMap = forwardRef<CompatibleGlobeHandle, Props>(funct
       onPointerMove={(event) => {
         const pts = pointersRef.current;
         if (!pts.has(event.pointerId)) return;
+        const press = pressRef.current;
+        if (press && Math.hypot(event.clientX - press.x, event.clientY - press.y) > 5) {
+          press.moved = true;
+        }
         pts.set(event.pointerId, { x: event.clientX, y: event.clientY });
         const pinch = pinchRef.current;
         if (pinch && pts.size >= 2) {
@@ -189,14 +209,38 @@ export const CompatibleGlobeMap = forwardRef<CompatibleGlobeHandle, Props>(funct
         }
         const drag = dragRef.current;
         if (!drag) return;
+        if (pressRef.current && !pressRef.current.moved) return;
         const sensitivity = 0.28 / zoomRef.current;
         setRotation([
           drag.rotation[0] + (event.clientX - drag.x) * sensitivity,
           Math.max(-75, Math.min(75, drag.rotation[1] - (event.clientY - drag.y) * sensitivity)),
         ]);
       }}
-      onPointerUp={(event) => endPointer(event.pointerId)}
-      onPointerCancel={(event) => endPointer(event.pointerId)}
+      onPointerUp={(event) => {
+        const press = pressRef.current;
+        const stationary = press && press.id === event.pointerId && !press.moved
+          && Math.hypot(event.clientX - press.x, event.clientY - press.y) <= 5;
+        const target = document.elementFromPoint(event.clientX, event.clientY)?.closest("[data-country-code]");
+        const code = target && event.currentTarget.contains(target) ? target.getAttribute("data-country-code") : null;
+        pressRef.current = null;
+        endPointer(event.pointerId);
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+          event.currentTarget.releasePointerCapture(event.pointerId);
+        }
+        if (stationary && code && code === press.code) {
+          const country = COUNTRIES.find((entry) => entry.code === code);
+          if (country) onSelect(country);
+        }
+      }}
+      onPointerCancel={(event) => {
+        pressRef.current = null;
+        endPointer(event.pointerId);
+      }}
+      onLostPointerCapture={(event) => {
+        if (!pointersRef.current.has(event.pointerId)) return;
+        pressRef.current = null;
+        endPointer(event.pointerId);
+      }}
     >
       <svg className="size-full" viewBox={`0 0 ${size.width} ${size.height}`} aria-hidden="true">
         <defs>
@@ -229,6 +273,7 @@ export const CompatibleGlobeMap = forwardRef<CompatibleGlobeHandle, Props>(funct
           return (
             <path
               key={`${code}-${index}`}
+              data-country-code={code}
               d={d}
               fill={country && isHomeCountry(country) ? "var(--beacon)" : category ? `var(${CATEGORIES[category].colorVar})` : "var(--land)"}
               fillOpacity={selected ? 0.9 : dimmed ? 0.08 : category ? 0.62 : 0.45}
@@ -236,10 +281,6 @@ export const CompatibleGlobeMap = forwardRef<CompatibleGlobeHandle, Props>(funct
               strokeOpacity={selected ? 0.95 : 0.8}
               strokeWidth={selected ? 1.8 : 0.55}
               className={country ? "country-path" : undefined}
-              onClick={(event) => {
-                event.stopPropagation();
-                if (country) onSelect(country);
-              }}
             />
           );
         })}
