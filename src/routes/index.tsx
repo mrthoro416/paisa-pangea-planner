@@ -7,6 +7,7 @@ const VIBE_ICONS = { beach: Palmtree, ski: MountainSnow, culture: Drama, nature:
 import { useTheme } from "@/hooks/use-theme";
 import { useLang } from "@/lib/i18n";
 import { LanguagePrompt } from "@/components/LanguagePrompt";
+import { PassportPrompt, PassportSelector } from "@/components/PassportPicker";
 import { COUNTRIES, type CountryEntry } from "@/data/countries";
 import { FILTERS, filterByKey, isAccessible, type FilterKey } from "@/lib/filters";
 import { GlobeMap, type GlobeHandle } from "@/components/GlobeMap";
@@ -71,8 +72,9 @@ function Index() {
         className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-2 px-3 lg:px-5"
         style={{ paddingTop: "max(env(safe-area-inset-top), 0.75rem)" }}
       >
-        <div className="pointer-events-auto min-w-0">
+        <div className="pointer-events-auto flex min-w-0 items-center gap-2">
           <PassportHUD count={hudCount} total={COUNTRIES.length} label={hudLabel} onReset={reset} />
+          <PassportSelector />
         </div>
         <div className="pointer-events-auto flex shrink-0 items-center gap-2">
           <button
@@ -158,6 +160,7 @@ function Index() {
       />
       <CountrySheet country={selected} onClose={() => setSelected(null)} />
       <LanguagePrompt />
+      <PassportPrompt />
     </div>
   );
 }

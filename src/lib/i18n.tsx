@@ -104,6 +104,14 @@ const ES: Record<string, string> = {
   "Verify before you travel": "Verifica antes de viajar",
   "Your privacy": "Tu privacidad",
   "Open the world map →": "Abrir el mapa mundial →",
+  // Passport preference
+  "Which country issued your passport?": "¿Qué país emitió tu pasaporte?",
+  "Visa results are for Colombian passport holders only — changing your passport here doesn't change the results yet.":
+    "Los resultados de visa son solo para pasaportes colombianos: cambiar tu pasaporte aquí aún no cambia los resultados.",
+  "Your passport": "Tu pasaporte",
+  "Change passport": "Cambiar pasaporte",
+  "Search countries…": "Buscar países…",
+  Selected: "Seleccionado",
 };
 
 const LONG: Record<Lang, Record<string, string>> = {
