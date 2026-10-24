@@ -5,7 +5,7 @@ import { useLang } from "@/lib/i18n";
 import { usePassportPref } from "@/lib/passport-pref";
 import { BeaconMark } from "@/components/BeaconLogo";
 
-const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
 /** Searchable A–Z country list shared by the onboarding prompt and the HUD selector. */
 function PassportSearchList({ onPick, autoFocus }: { onPick: (c: CountryEntry) => void; autoFocus?: boolean }) {
