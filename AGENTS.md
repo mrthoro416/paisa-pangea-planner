@@ -11,3 +11,4 @@
 
 - Render map-label flags from the bundled `flag-icons` package rather than emoji so country markers remain consistent across platforms.
 - Use the SVG orthographic globe on Apple/WebKit browsers because MapLibre globe rendering can lose country layers there.
+- The saved passport preference (`src/lib/passport-pref.tsx`, localStorage `paisa-passport`) is display-only personalization: all visa data stays Colombian-passport-only (`PASSPORT` in `src/data/countries.ts`), so never feed the preference into entry rules, filters, or the map.

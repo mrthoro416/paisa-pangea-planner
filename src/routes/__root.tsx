@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { LangProvider } from "../lib/i18n";
+import { PassportPrefProvider } from "../lib/passport-pref";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
@@ -150,7 +151,9 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <LangProvider>
-        <Outlet />
+        <PassportPrefProvider>
+          <Outlet />
+        </PassportPrefProvider>
       </LangProvider>
     </QueryClientProvider>
   );
