@@ -26,7 +26,10 @@ export const Route = createFileRoute("/")({
           "A 3D globe of entry requirements for Colombian passport holders — visa-free, visa on arrival, eVisa, ETA or embassy visa, with verification dates and official sources.",
       },
       { property: "og:title", content: "Paisa Planner — Colombian Passport Globe" },
-      { property: "og:description", content: "Spin the globe. See where your Colombian passport takes you — in seconds." },
+      {
+        property: "og:description",
+        content: "Spin the globe. See where your Colombian passport takes you — in seconds.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -44,7 +47,11 @@ function Index() {
   const { lang, setLang, t } = useLang();
 
   const counts = useMemo(
-    () => Object.fromEntries(FILTERS.map((f) => [f.key, COUNTRIES.filter(f.test).length])) as Record<FilterKey, number>,
+    () =>
+      Object.fromEntries(FILTERS.map((f) => [f.key, COUNTRIES.filter(f.test).length])) as Record<
+        FilterKey,
+        number
+      >,
     [],
   );
   const accessible = useMemo(() => COUNTRIES.filter(isAccessible).length, []);
@@ -65,14 +72,21 @@ function Index() {
   return (
     <div className="app-fixed bg-background">
       <h1 className="sr-only">Paisa Planner — entry requirements for Colombian passport holders</h1>
-      <GlobeMap key={theme} ref={globe} selectedCode={selected?.code ?? null} filter={filter} vibe={vibe} onSelect={pick} />
+      <GlobeMap
+        key={theme}
+        ref={globe}
+        selectedCode={selected?.code ?? null}
+        filter={filter}
+        vibe={vibe}
+        onSelect={pick}
+      />
 
       {/* Top HUD */}
       <div
         className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-2 px-3 lg:px-5"
         style={{ paddingTop: "max(env(safe-area-inset-top), 0.75rem)" }}
       >
-        <div className="pointer-events-auto flex min-w-0 items-center gap-2">
+        <div className="pointer-events-auto flex min-w-0 flex-1 items-center gap-2 lg:flex-none">
           <PassportHUD count={hudCount} total={COUNTRIES.length} label={hudLabel} onReset={reset} />
           <PassportSelector />
         </div>
@@ -84,7 +98,10 @@ function Index() {
             title={lang === "en" ? "Español" : "English"}
             className="map-overlay tap-target flex h-12 items-center gap-2 rounded-full px-3.5 text-muted-foreground transition-colors hover:text-foreground"
           >
-            <span className={`fi fi-${lang === "en" ? "us" : "co"} rounded-[2px] text-[15px]`} aria-hidden />
+            <span
+              className={`fi fi-${lang === "en" ? "us" : "co"} rounded-[2px] text-[15px]`}
+              aria-hidden
+            />
             <span className="mono text-foreground/80">{lang === "en" ? "EN" : "ES"}</span>
           </button>
           <button
@@ -100,8 +117,8 @@ function Index() {
             onClick={() => setSearchOpen(true)}
             className="map-overlay hidden h-12 items-center gap-3 rounded-full pl-4 pr-2 text-sm text-muted-foreground transition-colors hover:text-foreground lg:flex"
           >
-          ⌕ {t("Search destinations")}
-          <kbd className="mono rounded-full bg-accent px-2 py-1 text-faint">⌘K</kbd>
+            ⌕ {t("Search destinations")}
+            <kbd className="mono rounded-full bg-accent px-2 py-1 text-faint">⌘K</kbd>
           </button>
         </div>
       </div>

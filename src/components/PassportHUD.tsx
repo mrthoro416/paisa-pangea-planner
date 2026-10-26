@@ -15,7 +15,7 @@ interface Props {
 export function PassportHUD({ count, total, label, onReset }: Props) {
   const { lang, t, name } = useLang();
   return (
-    <div className="map-overlay flex items-center gap-1 rounded-full py-1 pl-1 pr-4">
+    <div className="map-overlay flex min-w-0 items-center gap-1 rounded-full py-1 pl-1 pr-4">
       <button
         type="button"
         onClick={onReset}
@@ -27,11 +27,13 @@ export function PassportHUD({ count, total, label, onReset }: Props) {
       </button>
       <div className="min-w-0 leading-tight" aria-live="polite">
         <p className="mono truncate text-foreground/90">
-          {PASSPORT.flag} {lang === "es" ? `${t("passport")} ${name(PASSPORT)}` : `${PASSPORT.name} passport`}
+          {PASSPORT.flag}{" "}
+          {lang === "es" ? `${t("passport")} ${name(PASSPORT)}` : `${PASSPORT.name} passport`}
         </p>
         <p className="mono truncate text-muted-foreground">
           <AnimatedNumber value={count} className="text-foreground" />
-          {count !== total ? ` / ${total}` : ""} {t(label)} · {t("verified")} {formatVerified(LAST_VERIFIED, lang)}
+          {count !== total ? ` / ${total}` : ""} {t(label)} · {t("verified")}{" "}
+          {formatVerified(LAST_VERIFIED, lang)}
         </p>
       </div>
     </div>
