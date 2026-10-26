@@ -32,6 +32,7 @@ export function LanguagePrompt() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
         >
           <motion.div
             role="dialog"
@@ -41,7 +42,7 @@ export function LanguagePrompt() {
             initial={{ y: 16, scale: 0.97 }}
             animate={{ y: 0, scale: 1 }}
             exit={{ y: 8, scale: 0.98 }}
-            transition={{ type: "spring", stiffness: 380, damping: 32 }}
+            transition={{ duration: 0.2 }}
           >
             <div className="flex justify-center">
               <BeaconMark size={40} className="beacon-glow" />
