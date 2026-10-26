@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
+import { Button } from "@/components/ui/button";
 import { COUNTRIES, PASSPORT, type CountryEntry } from "@/data/countries";
 import { useLang } from "@/lib/i18n";
 import { usePassportPref } from "@/lib/passport-pref";
@@ -26,7 +27,9 @@ function PassportSearchList({
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (autoFocus) setTimeout(() => inputRef.current?.focus(), 30);
+    if (!autoFocus) return;
+    const timer = setTimeout(() => inputRef.current?.focus(), 30);
+    return () => clearTimeout(timer);
   }, [autoFocus]);
 
   const results = useMemo(() => {
@@ -84,7 +87,10 @@ function PassportSearchList({
           role="combobox"
           aria-expanded
           aria-controls="passport-results"
-          className="h-12 flex-1 bg-transparent text-[16px] text-foreground outline-none placeholder:text-faint"
+          aria-activedescendant={
+            results[active] ? `passport-option-${results[active].code}` : undefined
+          }
+          className="h-12 min-w-0 flex-1 bg-transparent text-[16px] text-foreground outline-none placeholder:text-faint"
         />
       </div>
       <ul id="passport-results" role="listbox" className="mt-2 max-h-[46dvh] overflow-y-auto">
@@ -97,6 +103,7 @@ function PassportSearchList({
           return (
             <li
               key={c.code}
+              id={`passport-option-${c.code}`}
               role="option"
               aria-selected={isCurrent}
               onMouseEnter={() => setActive(i)}
@@ -136,7 +143,16 @@ function DataDisclosure({ className = "" }: { className?: string }) {
 export function PassportPrompt() {
   const { chosen: langChosen, t } = useLang();
   const { chosen, setPassport } = usePassportPref();
-  const open = langChosen && !chosen;
+  const [languageSettled, setLanguageSettled] = useState(false);
+  useEffect(() => {
+    if (!langChosen) {
+      setLanguageSettled(false);
+      return;
+    }
+    const timer = setTimeout(() => setLanguageSettled(true), 400);
+    return () => clearTimeout(timer);
+  }, [langChosen]);
+  const open = languageSettled && !chosen;
 
   return (
     <AnimatePresence>
@@ -182,7 +198,8 @@ export function PassportSelector() {
 
   return (
     <>
-      <button
+      <Button
+        variant="ghost"
         type="button"
         onClick={() => setOpen(true)}
         aria-label={`${t("Change passport")} — ${name(country)}`}
@@ -194,7 +211,7 @@ export function PassportSelector() {
           aria-hidden
         />
         <span className="mono text-foreground/80">{country.iso3}</span>
-      </button>
+      </Button>
       <AnimatePresence>
         {open && (
           <motion.div
@@ -208,6 +225,10 @@ export function PassportSelector() {
             <motion.div
               role="dialog"
               aria-label={t("Change passport")}
+              aria-modal="true"
+              onKeyDown={(e) => {
+                if (e.key === "Escape") setOpen(false);
+              }}
               className="map-overlay flex max-h-[80dvh] w-full max-w-md flex-col overflow-hidden rounded-3xl p-4"
               initial={{ y: -12, scale: 0.97 }}
               animate={{ y: 0, scale: 1 }}
@@ -217,14 +238,15 @@ export function PassportSelector() {
             >
               <div className="flex items-center justify-between gap-3 px-1 pb-3">
                 <h2 className="masthead text-lg text-foreground">{t("Your passport")}</h2>
-                <button
+                <Button
+                  variant="ghost"
                   type="button"
                   onClick={() => setOpen(false)}
                   aria-label={t("Close")}
                   className="tap-target flex shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                 >
                   ✕
-                </button>
+                </Button>
               </div>
               <PassportSearchList
                 autoFocus
