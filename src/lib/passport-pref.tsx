@@ -14,8 +14,12 @@ export const PASSPORT_PREF_KEY = "paisa-passport";
 const BY_CODE = new Map(COUNTRIES.map((c) => [c.code, c]));
 /** The dataset's passport — also the default when no preference is saved. */
 const DEFAULT_CODE = PASSPORT.code;
-const DEFAULT_COUNTRY = BY_CODE.get(DEFAULT_CODE);
-if (!DEFAULT_COUNTRY) throw new Error("Dataset passport is missing from COUNTRIES");
+function getDefaultCountry(): CountryEntry {
+  const country = BY_CODE.get(DEFAULT_CODE);
+  if (!country) throw new Error("Dataset passport is missing from COUNTRIES");
+  return country;
+}
+const DEFAULT_COUNTRY = getDefaultCountry();
 
 export function resolvePassportCountry(code: string | null | undefined): CountryEntry {
   return (code ? BY_CODE.get(code) : undefined) ?? DEFAULT_COUNTRY;
