@@ -1,14 +1,25 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
+import { Button } from "@/components/ui/button";
 import { COUNTRIES, PASSPORT, type CountryEntry } from "@/data/countries";
 import { useLang } from "@/lib/i18n";
 import { usePassportPref } from "@/lib/passport-pref";
 import { BeaconMark } from "@/components/BeaconLogo";
 
-const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+const norm = (s: string) =>
+  s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
 
 /** Searchable A–Z country list shared by the onboarding prompt and the HUD selector. */
-function PassportSearchList({ onPick, autoFocus }: { onPick: (c: CountryEntry) => void; autoFocus?: boolean }) {
+function PassportSearchList({
+  onPick,
+  autoFocus,
+}: {
+  onPick: (c: CountryEntry) => void;
+  autoFocus?: boolean;
+}) {
   const { t, name } = useLang();
   const { country: current } = usePassportPref();
   const [q, setQ] = useState("");
@@ -16,7 +27,9 @@ function PassportSearchList({ onPick, autoFocus }: { onPick: (c: CountryEntry) =
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (autoFocus) setTimeout(() => inputRef.current?.focus(), 30);
+    if (!autoFocus) return;
+    const timer = setTimeout(() => inputRef.current?.focus(), 30);
+    return () => clearTimeout(timer);
   }, [autoFocus]);
 
   const results = useMemo(() => {
@@ -24,8 +37,14 @@ function PassportSearchList({ onPick, autoFocus }: { onPick: (c: CountryEntry) =
     const n = norm(q.trim());
     if (!n) {
       // Current passport first, then Colombia (the dataset's passport), then A–Z.
-      const pinned = [current, ...sorted.filter((c) => c.code === PASSPORT.code && c.code !== current.code)];
-      return [...pinned, ...sorted.filter((c) => c.code !== current.code && c.code !== PASSPORT.code)];
+      const pinned = [
+        current,
+        ...sorted.filter((c) => c.code === PASSPORT.code && c.code !== current.code),
+      ];
+      return [
+        ...pinned,
+        ...sorted.filter((c) => c.code !== current.code && c.code !== PASSPORT.code),
+      ];
     }
     return sorted
       .filter(
@@ -58,8 +77,14 @@ function PassportSearchList({ onPick, autoFocus }: { onPick: (c: CountryEntry) =
             setActive(0);
           }}
           onKeyDown={(e) => {
-            if (e.key === "ArrowDown") (e.preventDefault(), setActive((a) => Math.min(a + 1, results.length - 1)));
-            if (e.key === "ArrowUp") (e.preventDefault(), setActive((a) => Math.max(a - 1, 0)));
+            if (e.key === "ArrowDown") {
+              e.preventDefault();
+              setActive((a) => Math.max(0, Math.min(a + 1, results.length - 1)));
+            }
+            if (e.key === "ArrowUp") {
+              e.preventDefault();
+              setActive((a) => Math.max(a - 1, 0));
+            }
             if (e.key === "Enter") choose(active);
           }}
           placeholder={t("Search countries…")}
@@ -67,24 +92,33 @@ function PassportSearchList({ onPick, autoFocus }: { onPick: (c: CountryEntry) =
           role="combobox"
           aria-expanded
           aria-controls="passport-results"
-          className="h-12 flex-1 bg-transparent text-[16px] text-foreground outline-none placeholder:text-faint"
+          aria-activedescendant={
+            results[active] ? `passport-option-${results[active].code}` : undefined
+          }
+          className="h-12 min-w-0 flex-1 bg-transparent text-[16px] text-foreground outline-none placeholder:text-faint"
         />
       </div>
       <ul id="passport-results" role="listbox" className="mt-2 max-h-[46dvh] overflow-y-auto">
-        {results.length === 0 && <li className="px-3 py-6 text-center text-sm text-muted-foreground">{t("No matches")}</li>}
+        {results.length === 0 && (
+          <li className="px-3 py-6 text-center text-sm text-muted-foreground">{t("No matches")}</li>
+        )}
         {results.map((c, i) => {
           const sel = i === active;
           const isCurrent = c.code === current.code;
           return (
             <li
               key={c.code}
+              id={`passport-option-${c.code}`}
               role="option"
               aria-selected={isCurrent}
               onMouseEnter={() => setActive(i)}
               onClick={() => choose(i)}
               className={`flex min-h-12 w-full cursor-pointer items-center gap-3 rounded-2xl px-3 text-left transition-colors ${sel ? "bg-accent" : ""}`}
             >
-              <span className={`fi fi-${c.code.toLowerCase()} shrink-0 rounded-[2px] text-[18px]`} aria-hidden />
+              <span
+                className={`fi fi-${c.code.toLowerCase()} shrink-0 rounded-[2px] text-[18px]`}
+                aria-hidden
+              />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-[15px] text-foreground">{name(c)}</span>
                 <span className="mono text-faint">{c.iso3}</span>
@@ -103,7 +137,9 @@ function DataDisclosure({ className = "" }: { className?: string }) {
   const { t } = useLang();
   return (
     <p className={`text-[11px] leading-relaxed text-faint ${className}`}>
-      {t("Visa results are for Colombian passport holders only — changing your passport here doesn't change the results yet.")}
+      {t(
+        "Visa results are for Colombian passport holders only — changing your passport here doesn't change the results yet.",
+      )}
     </p>
   );
 }
@@ -112,7 +148,16 @@ function DataDisclosure({ className = "" }: { className?: string }) {
 export function PassportPrompt() {
   const { chosen: langChosen, t } = useLang();
   const { chosen, setPassport } = usePassportPref();
-  const open = langChosen && !chosen;
+  const [languageSettled, setLanguageSettled] = useState(false);
+  useEffect(() => {
+    if (!langChosen) {
+      setLanguageSettled(false);
+      return;
+    }
+    const timer = setTimeout(() => setLanguageSettled(true), 400);
+    return () => clearTimeout(timer);
+  }, [langChosen]);
+  const open = languageSettled && !chosen;
 
   return (
     <AnimatePresence>
@@ -158,16 +203,20 @@ export function PassportSelector() {
 
   return (
     <>
-      <button
+      <Button
+        variant="ghost"
         type="button"
         onClick={() => setOpen(true)}
         aria-label={`${t("Change passport")} — ${name(country)}`}
         title={t("Change passport")}
         className="map-overlay tap-target flex h-12 shrink-0 items-center gap-2 rounded-full px-3.5 text-muted-foreground transition-colors hover:text-foreground"
       >
-        <span className={`fi fi-${country.code.toLowerCase()} rounded-[2px] text-[15px]`} aria-hidden />
+        <span
+          className={`fi fi-${country.code.toLowerCase()} rounded-[2px] text-[15px]`}
+          aria-hidden
+        />
         <span className="mono text-foreground/80">{country.iso3}</span>
-      </button>
+      </Button>
       <AnimatePresence>
         {open && (
           <motion.div
@@ -181,6 +230,10 @@ export function PassportSelector() {
             <motion.div
               role="dialog"
               aria-label={t("Change passport")}
+              aria-modal="true"
+              onKeyDown={(e) => {
+                if (e.key === "Escape") setOpen(false);
+              }}
               className="map-overlay flex max-h-[80dvh] w-full max-w-md flex-col overflow-hidden rounded-3xl p-4"
               initial={{ y: -12, scale: 0.97 }}
               animate={{ y: 0, scale: 1 }}
@@ -190,14 +243,15 @@ export function PassportSelector() {
             >
               <div className="flex items-center justify-between gap-3 px-1 pb-3">
                 <h2 className="masthead text-lg text-foreground">{t("Your passport")}</h2>
-                <button
+                <Button
+                  variant="ghost"
                   type="button"
                   onClick={() => setOpen(false)}
                   aria-label={t("Close")}
                   className="tap-target flex shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                 >
                   ✕
-                </button>
+                </Button>
               </div>
               <PassportSearchList
                 autoFocus

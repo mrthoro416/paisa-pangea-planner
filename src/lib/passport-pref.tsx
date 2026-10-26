@@ -1,4 +1,12 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { COUNTRIES, PASSPORT, type CountryEntry } from "@/data/countries";
 
 export const PASSPORT_PREF_KEY = "paisa-passport";
@@ -6,6 +14,16 @@ export const PASSPORT_PREF_KEY = "paisa-passport";
 const BY_CODE = new Map(COUNTRIES.map((c) => [c.code, c]));
 /** The dataset's passport — also the default when no preference is saved. */
 const DEFAULT_CODE = PASSPORT.code;
+function getDefaultCountry(): CountryEntry {
+  const country = BY_CODE.get(DEFAULT_CODE);
+  if (!country) throw new Error("Dataset passport is missing from COUNTRIES");
+  return country;
+}
+const DEFAULT_COUNTRY = getDefaultCountry();
+
+export function resolvePassportCountry(code: string | null | undefined): CountryEntry {
+  return (code ? BY_CODE.get(code) : undefined) ?? DEFAULT_COUNTRY;
+}
 
 interface Ctx {
   /** Effective passport country (defaults to Colombia, the dataset's passport). */
@@ -16,7 +34,7 @@ interface Ctx {
 }
 
 const PassportPrefContext = createContext<Ctx>({
-  country: BY_CODE.get(DEFAULT_CODE)!,
+  country: resolvePassportCountry(DEFAULT_CODE),
   chosen: true,
   setPassport: () => {},
 });
@@ -31,20 +49,29 @@ export function PassportPrefProvider({ children }: { children: ReactNode }) {
   const [chosen, setChosen] = useState(true);
 
   useEffect(() => {
-    const saved = window.localStorage.getItem(PASSPORT_PREF_KEY);
+    let saved: string | null = null;
+    try {
+      saved = window.localStorage.getItem(PASSPORT_PREF_KEY);
+    } catch {
+      // A blocked storage area must not prevent an in-memory choice.
+    }
     if (saved && BY_CODE.has(saved)) setCode(saved);
     else setChosen(false);
   }, []);
 
   const setPassport = useCallback((next: string) => {
     if (!BY_CODE.has(next)) return;
-    window.localStorage.setItem(PASSPORT_PREF_KEY, next);
+    try {
+      window.localStorage.setItem(PASSPORT_PREF_KEY, next);
+    } catch {
+      // The choice remains usable for this visit when storage is unavailable.
+    }
     setCode(next);
     setChosen(true);
   }, []);
 
   const value = useMemo<Ctx>(
-    () => ({ country: BY_CODE.get(code) ?? BY_CODE.get(DEFAULT_CODE)!, chosen, setPassport }),
+    () => ({ country: resolvePassportCountry(code), chosen, setPassport }),
     [code, chosen, setPassport],
   );
   return <PassportPrefContext.Provider value={value}>{children}</PassportPrefContext.Provider>;
