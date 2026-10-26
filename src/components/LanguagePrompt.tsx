@@ -18,7 +18,9 @@ export function LanguagePrompt() {
     if (chosen) return;
     const fromBrowser: Lang = navigator.language?.toLowerCase().startsWith("es") ? "es" : "en";
     getVisitorCountry()
-      .then(({ country }) => setSuggested(country ? (SPANISH_COUNTRIES.has(country) ? "es" : "en") : fromBrowser))
+      .then(({ country }) =>
+        setSuggested(country ? (SPANISH_COUNTRIES.has(country) ? "es" : "en") : fromBrowser),
+      )
       .catch(() => setSuggested(fromBrowser));
   }, [chosen]);
 
@@ -61,16 +63,27 @@ export function LanguagePrompt() {
                     autoFocus={rec}
                     onClick={() => setLang(o.lang)}
                     className={`flex min-h-16 w-full items-center gap-4 rounded-2xl px-4 text-left transition-all active:scale-[0.98] ${
-                      rec ? "bg-foreground text-background" : "border border-border text-foreground hover:bg-accent"
+                      rec
+                        ? "bg-foreground text-background"
+                        : "border border-border text-foreground hover:bg-accent"
                     }`}
                   >
-                    <span className={`fi fi-${o.flag} shrink-0 rounded-sm text-[22px]`} aria-hidden />
+                    <span
+                      className={`fi fi-${o.flag} shrink-0 rounded-sm text-[22px]`}
+                      aria-hidden
+                    />
                     <span className="min-w-0 flex-1">
                       <span className="block text-[16px] font-semibold">{o.label}</span>
-                      <span className={`block text-xs ${rec ? "text-background/60" : "text-muted-foreground"}`}>{o.hint}</span>
+                      <span
+                        className={`block text-xs ${rec ? "text-background/60" : "text-muted-foreground"}`}
+                      >
+                        {o.hint}
+                      </span>
                     </span>
                     {rec && (
-                      <span className="mono text-background/60">{o.lang === "es" ? "Sugerido" : "Suggested"}</span>
+                      <span className="mono text-background/60">
+                        {o.lang === "es" ? "Sugerido" : "Suggested"}
+                      </span>
                     )}
                   </button>
                 );
