@@ -1,17 +1,18 @@
-import { describe, expect, test } from "bun:test";
+import { describe, it as test } from "node:test";
+import { strict as assert } from "node:assert";
 import { PASSPORT } from "../data/countries";
 import { resolvePassportCountry } from "./passport-pref";
 
 describe("display-only passport preference", () => {
   test("saved ISO country code resolves to Japan", () => {
-    expect(resolvePassportCountry("JP").code).toBe("JP");
+    assert.equal(resolvePassportCountry("JP").code, "JP");
   });
   test("missing and invalid preferences default to Colombia", () => {
-    expect(resolvePassportCountry(null).code).toBe("CO");
-    expect(resolvePassportCountry("invalid").code).toBe("CO");
+    assert.equal(resolvePassportCountry(null).code, "CO");
+    assert.equal(resolvePassportCountry("invalid").code, "CO");
   });
   test("another preference leaves the Colombian dataset passport unchanged", () => {
     resolvePassportCountry("US");
-    expect(PASSPORT.code).toBe("CO");
+    assert.equal(PASSPORT.code, "CO");
   });
 });
