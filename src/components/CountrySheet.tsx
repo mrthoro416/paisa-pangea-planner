@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useAnimationControls, type PanInfo } from "motion/react";
-import { PASSPORT, type CountryEntry } from "@/data/countries";
-import { isHomeCountry, categoryMeta, maxStayText, officialSource, requirementItems, requirementSummary } from "@/lib/entry";
+import { type CountryEntry } from "@/data/countries";
+import { isHomeCountry, categoryMeta, maxStayText } from "@/lib/entry";
 import { formatVerified } from "@/lib/filters";
 import { ClimateCard } from "@/components/ClimateCard";
-import { useLang, longText } from "@/lib/i18n";
+import { usePassportPref } from "@/lib/passport-pref";
+import { resolveVisaCountry } from "@/lib/visa-rules";
+import { Button } from "@/components/ui/button";
+import { useLang } from "@/lib/i18n";
 
 interface Props {
   country: CountryEntry | null;
@@ -106,94 +109,58 @@ function MobileSheet({ country, onClose }: { country: CountryEntry; onClose: () 
 
 function Content({ country, onClose }: { country: CountryEntry; onClose: () => void }) {
   const { lang, t, name } = useLang();
-  if (isHomeCountry(country)) return <HomeContent country={country} onClose={onClose} />;
+  const { country: passport } = usePassportPref();
+  const resolved = resolveVisaCountry(country, passport.code);
+  const { rule } = resolved;
+  const meta = categoryMeta(resolved);
+  const home = isHomeCountry(resolved);
+  const known = resolved.category !== "unknown" || home;
   const cname = name(country);
-  const meta = categoryMeta(country);
-  const stay = maxStayText(country, lang);
-  const source = officialSource(country);
-  const items = requirementItems(country, lang).filter((i) => i !== country.note);
-  const color = `var(${meta.colorVar})`;
-  const host = source ? new URL(source.url).hostname.replace(/^www\./, "") : null;
-
+  const sourceUrl = rule.destination_authority_url;
   return (
     <div className="px-6 pb-[max(env(safe-area-inset-bottom),1.5rem)] pt-3 lg:pt-7">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="mono text-faint">
-            {country.iso3} · {t(country.region)}
-          </p>
-          <h2 className="masthead mt-1 truncate text-[28px] leading-tight text-foreground">
-            <span className="mr-2" aria-hidden>{country.flag}</span>
-            {cname}
+          <p className="mono text-faint">{country.iso3} · {t(country.region)}</p>
+          <h2 className="masthead mt-1 text-[28px] leading-tight text-foreground">
+            <span className={`fi fi-${country.code.toLowerCase()} mr-2 text-xl`} aria-hidden />{cname}
           </h2>
         </div>
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label={t("Close")}
-          className="tap-target -mr-2 flex shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-        >
-          ✕
-        </button>
+        <Button variant="ghost" onClick={onClose} aria-label={t("Close")} className="tap-target shrink-0 rounded-full">✕</Button>
       </div>
-
-      <div className="mt-3 flex items-center gap-3">
-        <span className="mono flex items-center gap-2 rounded-full px-2.5 py-1.5" style={{ color, background: `color-mix(in srgb, ${color} 12%, transparent)`, boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${color} 30%, transparent)` }}>
-          <span className="size-1.5 rounded-full" style={{ background: color, boxShadow: `0 0 8px ${color}` }} aria-hidden />
-          {t(meta.label)}
-        </span>
-        {country.maxStayDays != null && <span className="mono text-foreground/80">{country.maxStayDays} {t("days")}</span>}
-      </div>
-
-      <p className="mt-5 text-[15px] leading-relaxed text-foreground/80">{requirementSummary(country, lang, cname)}</p>
-
+      <p className="mono mt-4" style={{ color: `var(${meta.colorVar})` }}>{t(meta.label)}</p>
+      <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+        {t(known ? "Dataset-derived guidance, not individually verified against official authorities." : "No usable rule for this passport and destination. Missing data does not mean visa-free.")}
+      </p>
       <Section title={t("Entry")}>
+        <Row k={t("Passport")} v={name(passport)} />
         <Row k={t("Type")} v={t(meta.label)} />
-        <Row k={t("Stay")} v={stay?.replace(/^(Up to|Hasta) /, "") ?? t("Varies")} />
-        <Row k={t("Passport")} v={`${PASSPORT.flag} ${name(PASSPORT)}`} />
+        {known && <Row k={t("Stay")} v={home ? t("No limit") : maxStayText(resolved, lang) ?? t("Not available")} />}
       </Section>
-
+      {home && <p className="mt-4 text-sm text-muted-foreground">{t("Home-country logic, not a visa-policy record")}</p>}
       <ClimateCard code={country.code} name={cname} />
-
-      {country.note && (
-        <p className="mt-5 rounded-2xl bg-beacon-soft p-4 text-sm leading-relaxed text-foreground/90">{country.note}</p>
-      )}
-
-      <Section title={t("Requirements")}>
-        <ul className="space-y-2.5 py-1">
-          {items.map((i) => (
-            <li key={i} className="flex gap-3 text-sm leading-relaxed text-foreground/75">
-              <span className="mt-[8px] size-1 shrink-0 rounded-full bg-foreground/40" aria-hidden />
-              {i}
-            </li>
-          ))}
-        </ul>
+      {rule.entry_conditions_notes && !home && <Section title={t("Source conditions")}><p className="py-3 text-sm text-muted-foreground">{rule.entry_conditions_notes}</p>{lang === "es" && <p className="pb-3 text-xs text-muted-foreground">{t("Original source note (English)")}</p>}</Section>}
+      <Section title={t("Travel documents")}>
+        <p className="py-3 text-sm leading-relaxed text-muted-foreground">{t("Passport-specific document requirements are not available in this workbook.")}</p>
       </Section>
-
-      <Section title={t("Verified")}>
-        <Row k={t("Date")} v={formatVerified(country.lastVerified, lang)} mono />
-        <Row k={t("Source")} v={host ?? t("Needs verification")} mono />
+      <details className="mt-4 border-b border-border pb-3">
+        <summary className="tap-target flex cursor-pointer items-center text-sm text-foreground">{t("General guidance — not confirmed entry requirements")}</summary>
+        <p className="text-sm leading-relaxed text-muted-foreground">{t("Ask the destination authority about passport validity, visa/eVisa/ETA applications, stay limits, return tickets, accommodation, funds, insurance and vaccinations. Applicability has not been confirmed for this pair.")}</p>
+      </details>
+      <Section title={t("Data & sources")}>
+        <Row k={t("Coverage")} v={t(home ? "Home-country logic" : known ? "Partial — imported" : "Missing")} />
+        <Row k={t("Official verification")} v={t("Not yet verified")} />
+        {rule.source_as_of && <Row k={t("Source date")} v={formatVerified(rule.source_as_of, lang)} mono />}
+        {rule.source_dataset && <p className="py-3 break-words text-xs text-muted-foreground">{t("Source")}: {rule.source_dataset}</p>}
       </Section>
-
+      <details className="mt-4">
+        <summary className="tap-target flex cursor-pointer items-center text-sm text-muted-foreground">{t("Provenance")}</summary>
+        <p className="break-words text-xs leading-relaxed text-muted-foreground">{t("Original workbook audit fields")}: {rule.verification_status} · {rule.provenance_notes}</p>
+        {rule.rule_last_verified && <p className="mt-2 text-xs text-muted-foreground">{t("Inherited workbook date — not an official review")}: {rule.rule_last_verified}</p>}
+      </details>
       <div className="mt-6">
-        {source ? (
-          <a
-            href={source.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="tap-target flex w-full items-center justify-center gap-2 rounded-2xl bg-foreground px-4 py-3.5 text-sm font-semibold text-background transition-transform active:scale-[0.98]"
-          >
-            {lang === "es" ? t("Official entry information") : (source.label ?? "Official entry information")} <span aria-hidden>↗</span>
-          </a>
-        ) : (
-          <p className="rounded-2xl border border-border p-4 text-sm leading-relaxed text-muted-foreground">
-            <span className="mono block text-foreground/80">{t("Official source needs verification")}</span>
-            <span className="mt-1 block">{longText(lang, "confirmEmbassy", { name: cname })}</span>
-          </p>
-        )}
-        <p className="mt-3 text-[11px] leading-relaxed text-faint">
-          {t("Entry rules change. Always confirm with official government sources before booking. Links open in a new tab.")}
-        </p>
+        {sourceUrl ? <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className="tap-target flex items-center justify-center gap-2 rounded-2xl bg-foreground px-4 py-3.5 text-sm font-semibold text-background">{t("Official entry information")} ↗</a> : <p className="text-sm text-muted-foreground">{t("Official source needs verification")}</p>}
+        <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{t("Confirm eligibility for your passport with the destination authority. Links open in a new tab.")}</p>
       </div>
     </div>
   );
@@ -212,41 +179,7 @@ function Row({ k, v, mono }: { k: string; v: string; mono?: boolean }) {
   return (
     <div className="flex items-center justify-between gap-4 py-3">
       <span className="text-sm text-muted-foreground">{k}</span>
-      <span className={mono ? "mono text-foreground/85" : "text-sm text-foreground"}>{v}</span>
-    </div>
-  );
-}
-
-function HomeContent({ country, onClose }: { country: CountryEntry; onClose: () => void }) {
-  const { lang, t, name } = useLang();
-  const pname = name(PASSPORT);
-  return (
-    <div className="px-6 pb-[max(env(safe-area-inset-bottom),1.5rem)] pt-3 lg:pt-7">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="mono text-faint">{country.iso3} · {t(country.region)}</p>
-          <h2 className="masthead mt-1 truncate text-[28px] leading-tight text-foreground">
-            <span className="mr-2" aria-hidden>{country.flag}</span>
-            {name(country)}
-          </h2>
-        </div>
-        <button type="button" onClick={onClose} aria-label={t("Close")} className="tap-target -mr-2 flex shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">✕</button>
-      </div>
-      <div className="mt-3">
-        <span className="mono inline-flex items-center gap-2 rounded-full bg-beacon-soft px-2.5 py-1.5 text-beacon">
-          <span className="size-1.5 rounded-full bg-beacon" aria-hidden />
-          {t("Home country")}
-        </span>
-      </div>
-      <p className="mt-5 text-[15px] leading-relaxed text-foreground/80">
-        {longText(lang, "homeBody", { passport: pname })}
-      </p>
-      <Section title={t("Entry")}>
-        <Row k={t("Type")} v={t("Citizen — no visa")} />
-        <Row k={t("Stay")} v={t("No limit")} />
-        <Row k={t("Passport")} v={`${PASSPORT.flag} ${pname}`} />
-      </Section>
-      <ClimateCard code={country.code} name={name(country)} />
+      <span className={mono ? "mono text-foreground/85" : "text-right text-sm text-foreground"}>{v}</span>
     </div>
   );
 }

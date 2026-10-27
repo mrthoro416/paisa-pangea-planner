@@ -1,4 +1,5 @@
-import type { CountryEntry, EntryCategory } from "@/data/countries";
+import type { EntryCategory } from "@/data/countries";
+import type { VisaCountry } from "@/lib/visa-rules";
 import { isHomeCountry } from "@/lib/entry";
 
 export type FilterKey = "all" | EntryCategory | "stay90" | "stay30";
@@ -6,7 +7,7 @@ export type FilterKey = "all" | EntryCategory | "stay90" | "stay30";
 export interface FilterDef {
   key: FilterKey;
   label: string;
-  test: (c: CountryEntry) => boolean;
+  test: (c: VisaCountry) => boolean;
 }
 
 export const FILTERS: FilterDef[] = [
@@ -19,20 +20,20 @@ export const FILTERS: FilterDef[] = [
   {
     key: "stay90",
     label: "90+ days",
-    test: (c) => !isHomeCountry(c) && c.category !== "visa_required" && (c.maxStayDays ?? 0) >= 90,
+    test: (c) => !isHomeCountry(c) && c.category !== "unknown" && c.category !== "visa_required" && (c.maxStayDays ?? 0) >= 90,
   },
   {
     key: "stay30",
     label: "30+ days",
-    test: (c) => !isHomeCountry(c) && c.category !== "visa_required" && (c.maxStayDays ?? 0) >= 30,
+    test: (c) => !isHomeCountry(c) && c.category !== "unknown" && c.category !== "visa_required" && (c.maxStayDays ?? 0) >= 30,
   },
 ];
 
 export const filterByKey = new Map(FILTERS.map((f) => [f.key, f]));
 
 /** Countries a Colombian passport can reach without applying in advance at an embassy. */
-export function isAccessible(c: CountryEntry) {
-  return !isHomeCountry(c) && c.category !== "visa_required";
+export function isAccessible(c: VisaCountry) {
+  return !isHomeCountry(c) && c.category !== "unknown" && c.category !== "visa_required";
 }
 
 export function formatVerified(iso: string, lang: "en" | "es" = "en") {

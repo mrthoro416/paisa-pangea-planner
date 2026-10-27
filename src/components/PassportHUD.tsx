@@ -1,8 +1,6 @@
-import { PASSPORT, COUNTRIES } from "@/data/countries";
-const LAST_VERIFIED = COUNTRIES[0]?.lastVerified ?? "2026-09-26";
+import { usePassportPref } from "@/lib/passport-pref";
 import { BeaconMark } from "@/components/BeaconLogo";
 import { AnimatedNumber } from "@/components/AnimatedNumber";
-import { formatVerified } from "@/lib/filters";
 import { useLang } from "@/lib/i18n";
 
 interface Props {
@@ -14,6 +12,7 @@ interface Props {
 
 export function PassportHUD({ count, total, label, onReset }: Props) {
   const { lang, t, name } = useLang();
+  const { country } = usePassportPref();
   return (
     <div className="map-overlay flex min-w-0 items-center gap-1 rounded-full py-1 pl-1 pr-4">
       <button
@@ -27,13 +26,12 @@ export function PassportHUD({ count, total, label, onReset }: Props) {
       </button>
       <div className="min-w-0 leading-tight" aria-live="polite">
         <p className="mono truncate text-foreground/90">
-          {PASSPORT.flag}{" "}
-          {lang === "es" ? `${t("passport")} ${name(PASSPORT)}` : `${PASSPORT.name} passport`}
+          {country.flag}{" "}
+          {lang === "es" ? `${t("passport")} ${name(country)}` : `${country.name} passport`}
         </p>
         <p className="mono truncate text-muted-foreground">
           <AnimatedNumber value={count} className="text-foreground" />
-          {count !== total ? ` / ${total}` : ""} {t(label)} · {t("verified")}{" "}
-          {formatVerified(LAST_VERIFIED, lang)}
+          {count !== total ? ` / ${total}` : ""} {t(label)}
         </p>
       </div>
     </div>

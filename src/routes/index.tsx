@@ -8,7 +8,8 @@ import { useTheme } from "@/hooks/use-theme";
 import { useLang } from "@/lib/i18n";
 import { LanguagePrompt } from "@/components/LanguagePrompt";
 import { PassportPrompt, PassportSelector } from "@/components/PassportPicker";
-import { COUNTRIES, type CountryEntry } from "@/data/countries";
+import { useVisaCountries } from "@/lib/use-visa-countries";
+import { type CountryEntry } from "@/data/countries";
 import { FILTERS, filterByKey, isAccessible, type FilterKey } from "@/lib/filters";
 import { GlobeMap, type GlobeHandle } from "@/components/GlobeMap";
 import { PassportHUD } from "@/components/PassportHUD";
@@ -19,16 +20,16 @@ import { CountrySheet } from "@/components/CountrySheet";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Paisa Planner — Where can a Colombian passport take you?" },
+      { title: "Paisa Planner — Passport-aware travel map" },
       {
         name: "description",
         content:
-          "A 3D globe of entry requirements for Colombian passport holders — visa-free, visa on arrival, eVisa, ETA or embassy visa, with verification dates and official sources.",
+          "A passport-aware travel globe with partial Colombian seed rules, explicit missing coverage, climate averages and destination-authority references.",
       },
-      { property: "og:title", content: "Paisa Planner — Colombian Passport Globe" },
+      { property: "og:title", content: "Paisa Planner — Passport & Visa Globe" },
       {
         property: "og:description",
-        content: "Spin the globe. See where your Colombian passport takes you — in seconds.",
+        content: "Spin the globe. Explore entry categories where data exists; missing passport rules remain unknown.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -46,17 +47,18 @@ function Index() {
   const { theme, toggle } = useTheme();
   const { lang, setLang, t } = useLang();
 
+  const countries = useVisaCountries();
   const counts = useMemo(
     () =>
-      Object.fromEntries(FILTERS.map((f) => [f.key, COUNTRIES.filter(f.test).length])) as Record<
+      Object.fromEntries(FILTERS.map((f) => [f.key, countries.filter(f.test).length])) as Record<
         FilterKey,
         number
       >,
-    [],
+    [countries],
   );
-  const accessible = useMemo(() => COUNTRIES.filter(isAccessible).length, []);
+  const accessible = useMemo(() => countries.filter(isAccessible).length, [countries]);
   const hudCount = filter === "all" ? accessible : counts[filter];
-  const hudLabel = filter === "all" ? "without embassy visa" : filterByKey.get(filter)!.label;
+  const hudLabel = filter === "all" ? "without embassy visa" : filterByKey.get(filter)?.label ?? "All";
 
   const reset = () => {
     setSelected(null);
@@ -71,7 +73,7 @@ function Index() {
 
   return (
     <div className="app-fixed bg-background">
-      <h1 className="sr-only">Paisa Planner — entry requirements for Colombian passport holders</h1>
+      <h1 className="sr-only">Paisa Planner — passport-aware travel requirements</h1>
       <GlobeMap
         key={theme}
         ref={globe}
@@ -87,7 +89,7 @@ function Index() {
         style={{ paddingTop: "max(env(safe-area-inset-top), 0.75rem)" }}
       >
         <div className="pointer-events-auto flex min-w-0 flex-1 items-center gap-2 lg:flex-none">
-          <PassportHUD count={hudCount} total={COUNTRIES.length} label={hudLabel} onReset={reset} />
+          <PassportHUD count={hudCount} total={countries.length} label={hudLabel} onReset={reset} />
           <PassportSelector />
         </div>
         <div className="pointer-events-auto flex shrink-0 items-center gap-2">
@@ -161,8 +163,8 @@ function Index() {
             })}
           </div>
         </div>
-        <a href="/about" className="mono hidden text-faint hover:text-muted-foreground lg:block">
-          {t("Data & sources")}
+        <a href="/coverage" className="mono hidden text-faint hover:text-muted-foreground lg:block">
+          {t("View coverage")}
         </a>
       </div>
 

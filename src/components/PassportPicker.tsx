@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { COUNTRIES, PASSPORT, type CountryEntry } from "@/data/countries";
 import { useLang } from "@/lib/i18n";
 import { usePassportPref } from "@/lib/passport-pref";
+import * as Dialog from "@radix-ui/react-dialog";
+import { PASSPORT_OPTIONS, coverageFor } from "@/lib/visa-rules";
+import { Link } from "@tanstack/react-router";
 import { BeaconMark } from "@/components/BeaconLogo";
 
 const norm = (s: string) =>
@@ -33,7 +35,7 @@ function PassportSearchList({
   }, [autoFocus]);
 
   const results = useMemo(() => {
-    const sorted = [...COUNTRIES].sort((a, b) => name(a).localeCompare(name(b)));
+    const sorted = COUNTRIES.filter((c) => PASSPORT_OPTIONS.some((p) => p.code === c.code)).sort((a, b) => name(a).localeCompare(name(b)));
     const n = norm(q.trim());
     if (!n) {
       // Current passport first, then Colombia (the dataset's passport), then A–Z.
@@ -123,6 +125,7 @@ function PassportSearchList({
                 <span className="block truncate text-[15px] text-foreground">{name(c)}</span>
                 <span className="mono text-faint">{c.iso3}</span>
               </span>
+              <span className="mono text-muted-foreground">{t(c.code === "CO" ? "Partial" : "Missing")}</span>
               {isCurrent && <span className="mono text-beacon">{t("Selected")}</span>}
             </li>
           );
@@ -136,9 +139,9 @@ function PassportSearchList({
 function DataDisclosure({ className = "" }: { className?: string }) {
   const { t } = useLang();
   return (
-    <p className={`text-[11px] leading-relaxed text-faint ${className}`}>
+    <p className={`text-[11px] leading-relaxed text-muted-foreground ${className}`}>
       {t(
-        "Visa results are for Colombian passport holders only — changing your passport here doesn't change the results yet.",
+        "Only Colombian passport rules are imported so far. Other passports show unknown results, not Colombian rules. Confirm current eligibility with official authorities.",
       )}
     </p>
   );
@@ -160,38 +163,17 @@ export function PassportPrompt() {
   const open = languageSettled && !chosen;
 
   return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-background/70 px-4 backdrop-blur-md"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
-          <motion.div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="passport-title"
-            className="map-overlay w-full max-w-sm rounded-[28px] p-6"
-            initial={{ y: 16, scale: 0.97 }}
-            animate={{ y: 0, scale: 1 }}
-            exit={{ y: 8, scale: 0.98 }}
-            transition={{ type: "spring", stiffness: 380, damping: 32 }}
-          >
-            <div className="flex justify-center">
-              <BeaconMark size={40} className="beacon-glow" />
-            </div>
-            <h2 id="passport-title" className="masthead mt-4 text-center text-xl text-foreground">
-              {t("Which country issued your passport?")}
-            </h2>
-            <DataDisclosure className="mt-2 text-center" />
-            <div className="mt-5">
-              <PassportSearchList autoFocus onPick={(c) => setPassport(c.code)} />
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <Dialog.Root open={open}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 z-[60] bg-background/70 backdrop-blur-md" />
+        <Dialog.Content onEscapeKeyDown={(e) => e.preventDefault()} onPointerDownOutside={(e) => e.preventDefault()} className="map-overlay fixed left-1/2 top-1/2 z-[61] max-h-[90dvh] w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[28px] p-6">
+          <div className="flex justify-center"><BeaconMark size={40} className="beacon-glow" /></div>
+          <Dialog.Title className="masthead mt-4 text-center text-xl text-foreground">{t("Which country issued your passport?")}</Dialog.Title>
+          <Dialog.Description asChild><DataDisclosure className="mt-2 text-center" /></Dialog.Description>
+          <div className="mt-5"><PassportSearchList autoFocus onPick={(c) => setPassport(c.code)} /></div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }
 
@@ -200,71 +182,30 @@ export function PassportSelector() {
   const { t, name } = useLang();
   const { country, setPassport } = usePassportPref();
   const [open, setOpen] = useState(false);
+  const coverage = coverageFor(country.code);
 
   return (
-    <>
-      <Button
-        variant="ghost"
-        type="button"
-        onClick={() => setOpen(true)}
-        aria-label={`${t("Change passport")} — ${name(country)}`}
-        title={t("Change passport")}
-        className="map-overlay tap-target flex h-12 shrink-0 items-center gap-2 rounded-full px-3.5 text-muted-foreground transition-colors hover:text-foreground"
-      >
-        <span
-          className={`fi fi-${country.code.toLowerCase()} rounded-[2px] text-[15px]`}
-          aria-hidden
-        />
-        <span className="mono text-foreground/80">{country.iso3}</span>
-      </Button>
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            className="fixed inset-0 z-50 flex flex-col items-center bg-background/70 px-3 pt-[max(env(safe-area-inset-top),0.75rem)] backdrop-blur-md sm:pt-[14vh]"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            onClick={() => setOpen(false)}
-          >
-            <motion.div
-              role="dialog"
-              aria-label={t("Change passport")}
-              aria-modal="true"
-              onKeyDown={(e) => {
-                if (e.key === "Escape") setOpen(false);
-              }}
-              className="map-overlay flex max-h-[80dvh] w-full max-w-md flex-col overflow-hidden rounded-3xl p-4"
-              initial={{ y: -12, scale: 0.97 }}
-              animate={{ y: 0, scale: 1 }}
-              exit={{ y: -8, scale: 0.98 }}
-              transition={{ type: "spring", stiffness: 420, damping: 34 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex items-center justify-between gap-3 px-1 pb-3">
-                <h2 className="masthead text-lg text-foreground">{t("Your passport")}</h2>
-                <Button
-                  variant="ghost"
-                  type="button"
-                  onClick={() => setOpen(false)}
-                  aria-label={t("Close")}
-                  className="tap-target flex shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-                >
-                  ✕
-                </Button>
-              </div>
-              <PassportSearchList
-                autoFocus
-                onPick={(c) => {
-                  setPassport(c.code);
-                  setOpen(false);
-                }}
-              />
-              <DataDisclosure className="mt-3 border-t border-border px-1 pt-3" />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
+    <Dialog.Root open={open} onOpenChange={setOpen}>
+      <Dialog.Trigger asChild>
+        <Button variant="ghost" aria-label={`${t("Change passport")} — ${name(country)}`} className="map-overlay tap-target flex h-12 shrink-0 items-center gap-2 rounded-full px-3 text-muted-foreground">
+          <span className={`fi fi-${country.code.toLowerCase()} text-[15px]`} aria-hidden />
+          <span className="mono lg:hidden">{country.iso3}</span>
+          <span className="hidden max-w-32 truncate text-sm lg:block">{name(country)}</span>
+        </Button>
+      </Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 z-50 bg-background/70 backdrop-blur-md" />
+        <Dialog.Content className="map-overlay fixed left-1/2 top-1/2 z-[51] max-h-[90dvh] w-[calc(100%-1.5rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-3xl p-4">
+          <div className="flex items-center justify-between gap-3 pb-3">
+            <Dialog.Title className="masthead text-lg">{t("Your passport")}</Dialog.Title>
+            <Dialog.Close asChild><Button variant="ghost" aria-label={t("Close")} className="tap-target rounded-full">✕</Button></Dialog.Close>
+          </div>
+          <Dialog.Description asChild><DataDisclosure className="mb-3" /></Dialog.Description>
+          <PassportSearchList autoFocus onPick={(c) => { setPassport(c.code); setOpen(false); }} />
+          <p className="mono mt-3 text-muted-foreground">{coverage.partial} {t("Partial")} · {coverage.missing} {t("Missing")}</p>
+          <Link to="/coverage" onClick={() => setOpen(false)} className="tap-target mt-2 flex items-center text-sm text-beacon">{t("View coverage")} →</Link>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }

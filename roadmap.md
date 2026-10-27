@@ -1,0 +1,4 @@
+- [ ] Normalize workbook rows with provenance and explicit missing coverage.
+- [ ] Connect saved passport to map, search, counts, filters and destination details without resetting travel state.
+- [ ] Add bilingual coverage and document-requirement availability views.
+- [ ] Test Colombian and missing passport flows, persistence, climate and holiday filters; do not publish.

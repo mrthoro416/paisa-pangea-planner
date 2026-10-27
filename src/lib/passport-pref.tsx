@@ -8,10 +8,12 @@ import {
   type ReactNode,
 } from "react";
 import { COUNTRIES, PASSPORT, type CountryEntry } from "@/data/countries";
+import { PASSPORT_OPTIONS } from "@/lib/visa-rules";
 
 export const PASSPORT_PREF_KEY = "paisa-passport";
 
-const BY_CODE = new Map(COUNTRIES.map((c) => [c.code, c]));
+const optionCodes = new Set(PASSPORT_OPTIONS.map((c) => c.code));
+const BY_CODE = new Map(COUNTRIES.filter((c) => optionCodes.has(c.code)).map((c) => [c.code, c]));
 /** The dataset's passport — also the default when no preference is saved. */
 const DEFAULT_CODE = PASSPORT.code;
 function getDefaultCountry(): CountryEntry {
@@ -40,8 +42,7 @@ const PassportPrefContext = createContext<Ctx>({
 });
 
 /**
- * Stores the visitor's passport-issuing country as a local preference only.
- * It never feeds the visa dataset: all entry rules remain Colombian-passport data.
+ * Stores the passport code locally; rule resolution is separate from geography and UI state.
  */
 export function PassportPrefProvider({ children }: { children: ReactNode }) {
   // Start with the default and "chosen" so SSR and first client render match; sync after hydration.
