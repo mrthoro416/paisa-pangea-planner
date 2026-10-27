@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { COUNTRIES, type CountryEntry } from "@/data/countries";
-import { CATEGORIES } from "@/lib/entry";
+import { categoryMeta } from "@/lib/entry";
 import { FILTERS, type FilterKey } from "@/lib/filters";
+import { useVisaCountries } from "@/lib/use-visa-countries";
+import { type VisaCountry } from "@/lib/visa-rules";
 import { useLang } from "@/lib/i18n";
 
 interface Props {
@@ -27,6 +29,7 @@ const FILTER_WORDS: Array<[RegExp, FilterKey]> = [
 const REGIONS = [...new Set(COUNTRIES.map((c) => c.region))].filter(Boolean);
 
 export function CommandSearch({ open, onOpenChange, onPickCountry, onPickFilter }: Props) {
+  const countries = useVisaCountries();
   const [q, setQ] = useState("");
   const { t, name } = useLang();
   const [active, setActive] = useState(0);
@@ -53,20 +56,20 @@ export function CommandSearch({ open, onOpenChange, onPickCountry, onPickFilter 
 
   const results = useMemo(() => {
     const n = norm(q.trim());
-    type R = { kind: "filter"; key: FilterKey; region?: string | undefined; label: string } | { kind: "country"; c: CountryEntry };
+    type R = { kind: "filter"; key: FilterKey; region?: string | undefined; label: string } | { kind: "country"; c: VisaCountry };
     const out: R[] = [];
-    if (!n) return COUNTRIES.filter((c) => ["JP", "BR", "ES", "US", "MX", "TH"].includes(c.code)).map((c) => ({ kind: "country", c }) as R);
+    if (!n) return countries.filter((c) => ["JP", "BR", "ES", "US", "MX", "TH"].includes(c.code)).map((c) => ({ kind: "country", c }) as R);
     const fk = FILTER_WORDS.find(([re]) => re.test(n))?.[1];
     const region = REGIONS.find((r) => n.includes(norm(r)) || n.includes(norm(t(r))));
     if (fk) {
-      const label = t(FILTERS.find((f) => f.key === fk)!.label);
+      const label = t(FILTERS.find((f) => f.key === fk)?.label ?? "All");
       out.push({ kind: "filter", key: fk, region, label: region ? `${label} · ${t(region)}` : `${label} · ${t("destinations")}` });
     } else if (region) {
       out.push({ kind: "filter", key: "all", region, label: `${t("Fly to")} ${t(region)}` });
     }
     const countryQ = n.replace(/passport|pasaporte|sin visa|visa[\s-]?free|destinations?|destinos?|\bdays?\b|\bdias?\b|\d+/g, "").trim();
-    const matches = COUNTRIES.filter((c) => {
-      if (!countryQ) return fk && (!region || c.region === region) && FILTERS.find((f) => f.key === fk)!.test(c);
+    const matches = countries.filter((c) => {
+      if (!countryQ) return fk && (!region || c.region === region) && FILTERS.find((f) => f.key === fk)?.test(c);
       return (
         norm(c.name).includes(countryQ) ||
         norm(name(c)).includes(countryQ) ||
@@ -79,7 +82,7 @@ export function CommandSearch({ open, onOpenChange, onPickCountry, onPickFilter 
       .sort((a, b) => Number(!norm(name(a)).startsWith(countryQ)) - Number(!norm(name(b)).startsWith(countryQ)))
       .slice(0, 12);
     return [...out, ...matches.map((c) => ({ kind: "country", c }) as R)];
-  }, [q, t, name]);
+  }, [q, t, name, countries]);
 
   const choose = (i: number) => {
     const r = results[i];
@@ -152,7 +155,7 @@ export function CommandSearch({ open, onOpenChange, onPickCountry, onPickFilter 
                       <span className="mono text-faint">{t("Filter")}</span>
                     </li>
                   );
-                const m = CATEGORIES[r.c.category];
+                const m = categoryMeta(r.c);
                 return (
                   <li key={r.c.code} role="option" aria-selected={sel} className={base} onMouseEnter={() => setActive(i)} onClick={() => choose(i)}>
                     <span className="text-xl" aria-hidden>{r.c.flag}</span>

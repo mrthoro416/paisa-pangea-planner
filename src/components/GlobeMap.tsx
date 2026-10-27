@@ -3,10 +3,11 @@ import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "re
 import type { Map as MLMap, MapGeoJSONFeature } from "maplibre-gl";
 import { feature } from "topojson-client";
 import { countryByNumeric, COUNTRIES, type CountryEntry } from "@/data/countries";
-import { CATEGORIES } from "@/lib/entry";
+import { CATEGORIES, categoryMeta } from "@/lib/entry";
 import { filterByKey, type FilterKey } from "@/lib/filters";
 import { CompatibleGlobeMap, type CompatibleGlobeHandle } from "@/components/CompatibleGlobeMap";
 import { useLang } from "@/lib/i18n";
+import { useVisaCountries } from "@/lib/use-visa-countries";
 import { matchesVibe, type VibeKey } from "@/lib/vibes";
 
 export interface GlobeHandle {
@@ -39,6 +40,7 @@ interface Label {
 }
 
 export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selectedCode, filter, vibe, onSelect }, ref) {
+  const countries = useVisaCountries();
   const el = useRef<HTMLDivElement>(null);
   const fallbackRef = useRef<CompatibleGlobeHandle>(null);
   const mapRef = useRef<MLMap | null>(null);
@@ -88,8 +90,8 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
         code: c.code,
         iso3: c.iso3,
         name: c.name,
-        lng: c.lng!,
-        lat: c.lat!,
+        lng: c.lng ?? 0,
+        lat: c.lat ?? 0,
         color: (isHomeCountry(c) ? colors["home"] : colors[c.category]) ?? "#fff",
         rank: i,
       }));
@@ -136,8 +138,9 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
         map.addSource("countries", { type: "geojson", data: fc });
         const catColor = [
           "match",
-          ["get", "cat"],
+          ["coalesce", ["feature-state", "cat"], ["get", "cat"]],
           ...Object.entries(colors).flat(),
+          "unknown", cssVar("--muted-foreground"),
           "#2c2c35",
         ] as never;
         map.addLayer({
@@ -154,7 +157,7 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
               0.07,
               ["boolean", ["feature-state", "hover"], false],
               0.78,
-              ["==", ["get", "cat"], "none"],
+              ["==", ["coalesce", ["feature-state", "cat"], ["get", "cat"]], "none"],
               0.5,
               0.55,
             ],
@@ -220,7 +223,7 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
       map.on("mousemove", "fill", (e: { features?: MapGeoJSONFeature[]; point: { x: number; y: number } }) => {
         const f = e.features?.[0];
         const c = entryOf(f);
-        setHoverId(c ? (f!.id as number) : null);
+        setHoverId(c ? (f?.id as number) : null);
         map.getCanvas().style.cursor = c ? "pointer" : "";
         setHover(c ? { x: e.point.x, y: e.point.y, c } : null);
       });
@@ -294,16 +297,17 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
     const test = filterByKey.get(filter)?.test ?? (() => true);
     for (const f of fc.features) {
       const code = (f.properties as { code: string }).code;
-      const entry = code ? COUNTRIES.find((c) => c.code === code) : undefined;
+      const entry = code ? countries.find((c) => c.code === code) : undefined;
       map.setFeatureState(
         { source: "countries", id: f.id as number },
         {
+          cat: entry ? (isHomeCountry(entry) ? "home" : entry.category) : "none",
           selected: code !== "" && code === selectedCode,
           dim: (filter !== "all" || vibe != null) && (!entry || !test(entry) || !matchesVibe(entry, vibe ?? null)),
         },
       );
     }
-  }, [ready, selectedCode, filter, vibe]);
+  }, [ready, selectedCode, filter, vibe, countries]);
 
   useImperativeHandle(ref, () => ({
     resetView: () => {
@@ -343,7 +347,7 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
         className="inset-0"
         style={{ position: "absolute", inset: 0 }}
         role="application"
-        aria-label={t("Interactive globe of entry requirements for Colombian passport holders")}
+        aria-label={t("Interactive passport-aware travel globe")}
       />
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
         {labels.map((l) => (
@@ -378,9 +382,9 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
           <p className="text-[13px] font-medium text-foreground">
             {hover.c.flag} {name(hover.c)}
           </p>
-          <p className="mono mt-0.5" style={{ color: `var(${CATEGORIES[hover.c.category].colorVar})` }}>
-            {t(CATEGORIES[hover.c.category].label)}
-            {hover.c.maxStayDays ? ` · ${hover.c.maxStayDays} ${t("days")}` : ""}
+          <p className="mono mt-0.5" style={{ color: `var(${categoryMeta(countries.find((c) => c.code === hover.c.code) ?? hover.c).colorVar})` }}>
+            {t(categoryMeta(countries.find((c) => c.code === hover.c.code) ?? hover.c).label)}
+            {countries.find((c) => c.code === hover.c.code)?.maxStayDays ? ` · ${countries.find((c) => c.code === hover.c.code)?.maxStayDays} ${t("days")}` : ""}
           </p>
         </div>
       )}

@@ -1,5 +1,6 @@
 import { PASSPORT, type CountryEntry, type EntryCategory } from "@/data/countries";
 import { OFFICIAL_SOURCES, type OfficialSource } from "@/data/sources";
+import type { VisaCountry } from "@/lib/visa-rules";
 import type { Lang } from "@/lib/i18n";
 
 export const CATEGORY_ORDER: EntryCategory[] = [
@@ -57,8 +58,11 @@ export const CATEGORIES: Record<EntryCategory, CategoryMeta> = {
   },
 };
 
-export function categoryMeta(c: CountryEntry): CategoryMeta {
-  return CATEGORIES[c.category];
+export const UNKNOWN_META = { key: "unknown", label: "Visa information not available", short: "Unknown", description: "Not yet verified", colorVar: "--muted-foreground" } as const;
+export const HOME_META = { key: "home_country", label: "Home country", short: "Home country", description: "Home-country logic, not a visa-policy record", colorVar: "--beacon" } as const;
+export function categoryMeta(c: CountryEntry | VisaCountry) {
+  if (isHomeCountry(c)) return HOME_META;
+  return c.category === "unknown" ? UNKNOWN_META : CATEGORIES[c.category];
 }
 
 /** Stay length without the "Up to" prefix, e.g. "90 days" / "90 días". */
@@ -193,6 +197,6 @@ export function officialSource(c: CountryEntry): OfficialSource | null {
 }
 
 /** The passport's own country: citizens enter freely, so it is never a visa destination. */
-export function isHomeCountry(c: CountryEntry) {
-  return c.code === PASSPORT.code;
+export function isHomeCountry(c: CountryEntry | VisaCountry) {
+  return "rule" in c ? c.rule.entry_permission === "home_country" && c.rule.coverage_status === "logic_only" : c.code === PASSPORT.code;
 }

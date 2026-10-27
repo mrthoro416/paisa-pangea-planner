@@ -1,11 +1,11 @@
-import { isHomeCountry } from "@/lib/entry";
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { geoOrthographic, geoPath } from "d3-geo";
 import { feature } from "topojson-client";
 import { countryByNumeric, COUNTRIES, type CountryEntry } from "@/data/countries";
-import { CATEGORIES } from "@/lib/entry";
+import { categoryMeta } from "@/lib/entry";
 import { filterByKey, type FilterKey } from "@/lib/filters";
 import { useLang } from "@/lib/i18n";
+import { useVisaCountries } from "@/lib/use-visa-countries";
 import { matchesVibe, type VibeKey } from "@/lib/vibes";
 
 export interface CompatibleGlobeHandle {
@@ -28,6 +28,7 @@ export const CompatibleGlobeMap = forwardRef<CompatibleGlobeHandle, Props>(funct
   { selectedCode, filter, vibe = null, onSelect },
   ref,
 ) {
+  const countries = useVisaCountries();
   const containerRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<{ x: number; y: number; rotation: [number, number] } | null>(null);
   const { t, name } = useLang();
@@ -164,7 +165,7 @@ export const CompatibleGlobeMap = forwardRef<CompatibleGlobeHandle, Props>(funct
       ref={containerRef}
       className="absolute inset-0 touch-none overflow-hidden"
       role="application"
-      aria-label={t("Interactive globe of entry requirements for Colombian passport holders")}
+      aria-label={t("Interactive passport-aware travel globe")}
       onPointerDown={(event) => {
         if (event.pointerType === "mouse" && event.button !== 0) return;
         const target = event.target instanceof Element ? event.target.closest("[data-country-code]") : null;
@@ -264,10 +265,11 @@ export const CompatibleGlobeMap = forwardRef<CompatibleGlobeHandle, Props>(funct
         />
         {features.map((item, index) => {
           const code = item.properties.code ?? "";
-          const country = code ? COUNTRIES.find((entry) => entry.code === code) : undefined;
+          const country = code ? countries.find((entry) => entry.code === code) : undefined;
           const selected = code !== "" && code === selectedCode;
           const dimmed = (filter !== "all" || vibe != null) && (!country || !activeTest(country) || !matchesVibe(country, vibe));
-          const category = country?.category;
+          const meta = country ? categoryMeta(country) : null;
+          const category = country?.category !== "unknown" ? country?.category : null;
           const d = path(item);
           if (!d) return null;
           return (
@@ -275,7 +277,7 @@ export const CompatibleGlobeMap = forwardRef<CompatibleGlobeHandle, Props>(funct
               key={`${code}-${index}`}
               data-country-code={code}
               d={d}
-              fill={country && isHomeCountry(country) ? "var(--beacon)" : category ? `var(${CATEGORIES[category].colorVar})` : "var(--land)"}
+              fill={meta ? `var(${meta.colorVar})` : "var(--land)"}
               fillOpacity={selected ? 0.9 : dimmed ? 0.08 : category ? 0.62 : 0.45}
               stroke={selected ? "var(--foreground)" : "var(--background)"}
               strokeOpacity={selected ? 0.95 : 0.8}
