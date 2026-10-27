@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import { BeaconMark } from "@/components/BeaconLogo";
 import { CATEGORIES, CATEGORY_ORDER } from "@/lib/entry";
-import { COUNTRIES, PASSPORT } from "@/data/countries";
+import { PASSPORT } from "@/data/countries";
+import { useVisaCountries } from "@/lib/use-visa-countries";
 import { useLang, longText } from "@/lib/i18n";
 
 export const Route = createFileRoute("/about")({
@@ -28,9 +29,10 @@ export const Route = createFileRoute("/about")({
 
 function About() {
   const { lang, t, name } = useLang();
+  const countries = useVisaCountries();
   const counts = CATEGORY_ORDER.map((key) => ({
     key,
-    n: COUNTRIES.filter((c) => c.category === key).length,
+    n: countries.filter((c) => c.category === key).length,
   }));
   return (
     <div className="min-h-dvh bg-background px-5 pb-16" style={{ paddingTop: "max(env(safe-area-inset-top), 1.5rem)" }}>
@@ -53,6 +55,7 @@ function About() {
           {longText(lang, "aboutIntro", { passport: `${PASSPORT.flag} ${name(PASSPORT)}` })}
         </p>
 
+        <Link to="/coverage" className="tap-target mt-4 flex items-center text-sm text-beacon">{t("View coverage")} →</Link>
         <h2 className="font-display mt-10 text-xl font-semibold text-foreground">{t("The five categories")}</h2>
         <ul className="mt-4 space-y-3">
           {counts.map(({ key, n }) => (
@@ -75,7 +78,7 @@ function About() {
 
         <h2 className="font-display mt-10 text-xl font-semibold text-foreground">{t("Where the data comes from")}</h2>
         <p className="mt-3 text-sm leading-relaxed text-foreground/85">
-          {longText(lang, "aboutData", { date: COUNTRIES[0]?.lastVerified ?? "2026-09-26" })}
+          {longText(lang, "aboutData", { date: "2026-09-26" })}
         </p>
 
         <h2 className="font-display mt-10 text-xl font-semibold text-foreground">{t("Verify before you travel")}</h2>

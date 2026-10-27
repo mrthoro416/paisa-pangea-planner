@@ -9,6 +9,40 @@ export const SPANISH_COUNTRIES = new Set([
 ]);
 
 const ES: Record<string, string> = {
+  "Unknown": "Desconocido",
+  "Visa information not available": "Información de visa no disponible",
+  "Not yet verified": "Aún no verificado",
+  "Only Colombian passport rules are imported so far. Other passports show unknown results, not Colombian rules. Confirm current eligibility with official authorities.": "Por ahora solo se importaron reglas para pasaportes colombianos. Otros pasaportes muestran resultados desconocidos, no reglas colombianas. Confirma tu elegibilidad actual con las autoridades oficiales.",
+  "Partial": "Parcial",
+  "Missing": "Sin datos",
+  "Partial — imported": "Parcial — importado",
+  "Home-country logic": "Lógica del país de origen",
+  "Home-country logic, not a visa-policy record": "Lógica del país de origen, no un registro de política de visas",
+  "View coverage": "Ver cobertura",
+  "Coverage": "Cobertura",
+  "Passport data coverage": "Cobertura de datos por pasaporte",
+  "Passport options": "Opciones de pasaporte",
+  "Pairs": "Combinaciones",
+  "Officially verified": "Verificados oficialmente",
+  "Coverage status": "Estado de cobertura",
+  "Provenance": "Procedencia",
+  "Source date": "Fecha del conjunto de datos",
+  "Official verification": "Verificación oficial",
+  "Not available": "No disponible",
+  "Source conditions": "Condiciones de la fuente",
+  "Original source note (English)": "Nota original de la fuente (en inglés)",
+  "Travel documents": "Documentos de viaje",
+  "Dataset-derived guidance, not individually verified against official authorities.": "Orientación derivada de un conjunto de datos, no verificada individualmente con las autoridades oficiales.",
+  "No usable rule for this passport and destination. Missing data does not mean visa-free.": "No hay una regla disponible para este pasaporte y destino. La falta de datos no significa entrada sin visa.",
+  "Passport-specific document requirements are not available in this workbook.": "Este archivo no contiene requisitos de documentos específicos para cada pasaporte.",
+  "General guidance — not confirmed entry requirements": "Orientación general — no son requisitos de entrada confirmados",
+  "Ask the destination authority about passport validity, visa/eVisa/ETA applications, stay limits, return tickets, accommodation, funds, insurance and vaccinations. Applicability has not been confirmed for this pair.": "Consulta con la autoridad del destino sobre vigencia del pasaporte, solicitudes de visa/eVisa/ETA, límites de estadía, tiquetes de regreso, alojamiento, fondos, seguro y vacunas. No se ha confirmado su aplicación para esta combinación.",
+  "Confirm eligibility for your passport with the destination authority. Links open in a new tab.": "Confirma la elegibilidad de tu pasaporte con la autoridad del destino. Los enlaces se abren en una pestaña nueva.",
+  "Original workbook audit fields": "Campos originales de auditoría del archivo",
+  "Inherited workbook date — not an official review": "Fecha heredada del archivo — no es una revisión oficial",
+  "Passport-issuer authority links are not supplied. New sources require licensing, provenance, update cadence and field-definition review before use.": "No se proporcionaron enlaces de las autoridades emisoras de pasaportes. Las nuevas fuentes requieren revisión de licencia, procedencia, frecuencia de actualización y definición de campos antes de usarse.",
+  "Interactive passport-aware travel globe": "Globo interactivo de viajes según el pasaporte",
+
   // Categories
   "Visa-free": "Sin visa",
   "Visa on arrival": "Visa a la llegada",
@@ -117,9 +151,9 @@ const ES: Record<string, string> = {
 const LONG: Record<Lang, Record<string, string>> = {
   en: {
     aboutIntro:
-      "Paisa Planner answers one question: as a {passport} passport holder, what do you need to enter a country? Every destination is classified into one of five entry categories, and the map, search, legend and statistics all derive from a single structured dataset.",
+      "Paisa Planner connects your saved passport choice to available destination rules. The uploaded matrix currently contains only partial Colombian rules; other passport combinations are unknown, never inferred. Climate and holiday styles remain available for every destination.",
     aboutData:
-      "Visa classifications are compiled from the open-source passport-index dataset (github.com/ilyankou/passport-index-dataset), which aggregates official government announcements and IATA travel information, reviewed as of {date}. Links in each country panel point to official government portals wherever one could be confidently identified — destinations without a verified official source say so explicitly instead of guessing.",
+      "The uploaded workbook imports the existing passport-index dataset (github.com/ilyankou/passport-index-dataset), source date {date}. These imported records have not been individually verified against current official authorities. Destination links are inherited references, not proof of eligibility. Passport-issuer links and passport-specific document lists are not supplied.",
     aboutVerify:
       "Entry requirements can change at short notice. Always verify current requirements with the destination's official immigration or foreign ministry website — and with your airline — before traveling. This guide is an information tool, not a visa service.",
     aboutPrivacy:
@@ -130,9 +164,9 @@ const LONG: Record<Lang, Record<string, string>> = {
   },
   es: {
     aboutIntro:
-      "Paisa Planner responde una pregunta: con pasaporte de {passport}, ¿qué necesitas para entrar a un país? Cada destino se clasifica en una de cinco categorías de entrada, y el mapa, la búsqueda, la leyenda y las estadísticas salen de un mismo conjunto de datos.",
+      "Paisa Planner conecta tu elección de pasaporte con las reglas disponibles de cada destino. El archivo importado contiene solo reglas parciales para Colombia; otras combinaciones son desconocidas y nunca se infieren. El clima y los estilos de viaje siguen disponibles para todos los destinos.",
     aboutData:
-      "Las clasificaciones de visa provienen del conjunto de datos abierto passport-index (github.com/ilyankou/passport-index-dataset), que reúne anuncios oficiales de gobiernos e información de viaje de IATA, revisado al {date}. Los enlaces de cada país llevan a portales oficiales del gobierno cuando se pudo identificar uno con certeza; los destinos sin fuente oficial verificada lo indican en lugar de adivinar.",
+      "El archivo importado contiene los datos existentes de passport-index (github.com/ilyankou/passport-index-dataset), con fecha de fuente {date}. Los registros importados no se han verificado individualmente con las autoridades oficiales actuales. Los enlaces heredados no prueban la elegibilidad. No se proporcionaron enlaces de autoridades emisoras ni listas de documentos específicas por pasaporte.",
     aboutVerify:
       "Los requisitos de entrada pueden cambiar sin previo aviso. Verifica siempre los requisitos vigentes en el sitio oficial de migración o cancillería del destino, y con tu aerolínea, antes de viajar. Esta guía es una herramienta informativa, no un servicio de visas.",
     aboutPrivacy:

@@ -163,8 +163,8 @@ function Index() {
             })}
           </div>
         </div>
-        <a href="/about" className="mono hidden text-faint hover:text-muted-foreground lg:block">
-          {t("Data & sources")}
+        <a href="/coverage" className="mono hidden text-faint hover:text-muted-foreground lg:block">
+          {t("View coverage")}
         </a>
       </div>
 
