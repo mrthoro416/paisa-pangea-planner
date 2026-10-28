@@ -2,3 +2,6 @@
 - [x] Connect saved passport to map, search, counts, filters and destination details without resetting travel state.
 - [x] Add bilingual coverage and document-requirement availability views.
 - [x] Test Colombian and missing passport flows, persistence, climate and holiday filters; do not publish.
+- [ ] Import canonical global rules, passport registry, source register and category dictionary; retain Colombian discrepancies.
+- [ ] Connect all categories and source details in English/Spanish while preserving travel state.
+- [ ] Verify representative passports, unknown/missing safety, onboarding and desktop/mobile flows; do not publish.
