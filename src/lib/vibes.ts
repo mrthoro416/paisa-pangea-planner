@@ -31,6 +31,6 @@ export const VIBES: Array<{ key: VibeKey; label: string }> = [
   { key: "nature", label: "Nature" },
 ];
 
-export function matchesVibe(c: CountryEntry, vibe: VibeKey | null) {
+export function matchesVibe(c: Pick<CountryEntry, "code">, vibe: VibeKey | null) {
   return !vibe || LOOKUP[vibe].has(c.code);
 }

@@ -114,7 +114,10 @@ export function CommandSearch({ open, onOpenChange, onPickCountry, onPickFilter 
     const r = results[i];
     if (!r) return;
     onOpenChange(false);
-    if (r.kind === "country") onPickCountry(r.c);
+    if (r.kind === "country") {
+      const destination = COUNTRIES.find((c) => c.code === r.c.code);
+      if (destination) onPickCountry(destination);
+    }
     else onPickFilter(r.key, r.region);
   };
 
@@ -152,10 +155,14 @@ export function CommandSearch({ open, onOpenChange, onPickCountry, onPickFilter 
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Escape") onOpenChange(false);
-                  if (e.key === "ArrowDown")
-                    (e.preventDefault(), setActive((a) => Math.min(a + 1, results.length - 1)));
-                  if (e.key === "ArrowUp")
-                    (e.preventDefault(), setActive((a) => Math.max(a - 1, 0)));
+                  if (e.key === "ArrowDown") {
+                    e.preventDefault();
+                    setActive((a) => Math.min(a + 1, results.length - 1));
+                  }
+                  if (e.key === "ArrowUp") {
+                    e.preventDefault();
+                    setActive((a) => Math.max(a - 1, 0));
+                  }
                   if (e.key === "Enter") choose(active);
                 }}
                 placeholder={t("Japan, visa-free Europe, 90 days…")}

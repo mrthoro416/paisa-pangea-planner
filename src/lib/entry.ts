@@ -81,7 +81,7 @@ export function categoryMeta(c: CountryEntry | VisaCountry) {
 }
 
 /** Stay length without the "Up to" prefix, e.g. "90 days" / "90 días". */
-export function stayLength(c: CountryEntry, lang: Lang = "en"): string | null {
+export function stayLength(c: Pick<CountryEntry, "maxStayDays">, lang: Lang = "en"): string | null {
   if (c.maxStayDays == null) return null;
   if (c.maxStayDays >= 365) {
     const y = Math.round(c.maxStayDays / 365);
@@ -91,7 +91,7 @@ export function stayLength(c: CountryEntry, lang: Lang = "en"): string | null {
   return lang === "es" ? `${d} día${d === 1 ? "" : "s"}` : `${d} day${d === 1 ? "" : "s"}`;
 }
 
-export function maxStayText(c: CountryEntry, lang: Lang = "en"): string | null {
+export function maxStayText(c: Pick<CountryEntry, "maxStayDays">, lang: Lang = "en"): string | null {
   const s = stayLength(c, lang);
   if (!s) return null;
   return lang === "es" ? `Hasta ${s}` : `Up to ${s}`;

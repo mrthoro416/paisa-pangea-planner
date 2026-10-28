@@ -173,7 +173,7 @@ export function PassportPrompt() {
         <Dialog.Content
           onEscapeKeyDown={(e) => e.preventDefault()}
           onPointerDownOutside={(e) => e.preventDefault()}
-          className="map-overlay fixed left-1/2 top-1/2 z-[61] max-h-[90dvh] w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[28px] p-6"
+          className="map-overlay fixed left-1/2 top-1/2 z-[61] max-h-[90dvh] w-[calc(100%_-_2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-[28px] p-6"
         >
           <div className="flex justify-center">
             <BeaconMark size={40} className="beacon-glow" />
@@ -215,7 +215,7 @@ export function PassportSelector() {
       </Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-background/70 backdrop-blur-md" />
-        <Dialog.Content className="map-overlay fixed left-1/2 top-1/2 z-[51] max-h-[90dvh] w-[calc(100%-1.5rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-3xl p-4">
+        <Dialog.Content className="map-overlay fixed left-1/2 top-1/2 z-[51] max-h-[90dvh] w-[calc(100%_-_1.5rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-3xl p-4">
           <div className="flex items-center justify-between gap-3 pb-3">
             <Dialog.Title className="masthead text-lg">{t("Your passport")}</Dialog.Title>
             <Dialog.Close asChild>
