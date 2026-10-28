@@ -1,46 +1,84 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 
 export type Lang = "en" | "es";
 export const LANG_KEY = "paisa-lang";
 
 /** Countries where Spanish is the main language — used to suggest Spanish from the visitor's IP. */
 export const SPANISH_COUNTRIES = new Set([
-  "CO", "ES", "MX", "AR", "CL", "PE", "VE", "EC", "BO", "PY", "UY", "CR", "PA", "GT", "HN", "SV", "NI", "DO", "CU", "PR", "GQ",
+  "CO",
+  "ES",
+  "MX",
+  "AR",
+  "CL",
+  "PE",
+  "VE",
+  "EC",
+  "BO",
+  "PY",
+  "UY",
+  "CR",
+  "PA",
+  "GT",
+  "HN",
+  "SV",
+  "NI",
+  "DO",
+  "CU",
+  "PR",
+  "GQ",
 ]);
 
 const ES: Record<string, string> = {
-  "Unknown": "Desconocido",
+  Unknown: "Desconocido",
   "Visa information not available": "Información de visa no disponible",
   "Not yet verified": "Aún no verificado",
-  "Only Colombian passport rules are imported so far. Other passports show unknown results, not Colombian rules. Confirm current eligibility with official authorities.": "Por ahora solo se importaron reglas para pasaportes colombianos. Otros pasaportes muestran resultados desconocidos, no reglas colombianas. Confirma tu elegibilidad actual con las autoridades oficiales.",
-  "Partial": "Parcial",
-  "Missing": "Sin datos",
+  "Only Colombian passport rules are imported so far. Other passports show unknown results, not Colombian rules. Confirm current eligibility with official authorities.":
+    "Por ahora solo se importaron reglas para pasaportes colombianos. Otros pasaportes muestran resultados desconocidos, no reglas colombianas. Confirma tu elegibilidad actual con las autoridades oficiales.",
+  Partial: "Parcial",
+  Missing: "Sin datos",
   "Partial — imported": "Parcial — importado",
   "Home-country logic": "Lógica del país de origen",
-  "Home-country logic, not a visa-policy record": "Lógica del país de origen, no un registro de política de visas",
+  "Home-country logic, not a visa-policy record":
+    "Lógica del país de origen, no un registro de política de visas",
   "View coverage": "Ver cobertura",
-  "Coverage": "Cobertura",
+  Coverage: "Cobertura",
   "Passport data coverage": "Cobertura de datos por pasaporte",
   "Passport options": "Opciones de pasaporte",
-  "Pairs": "Combinaciones",
+  Pairs: "Combinaciones",
   "Officially verified": "Verificados oficialmente",
   "Coverage status": "Estado de cobertura",
-  "Provenance": "Procedencia",
+  Provenance: "Procedencia",
   "Source date": "Fecha del conjunto de datos",
   "Official verification": "Verificación oficial",
   "Not available": "No disponible",
   "Source conditions": "Condiciones de la fuente",
   "Original source note (English)": "Nota original de la fuente (en inglés)",
   "Travel documents": "Documentos de viaje",
-  "Dataset-derived guidance, not individually verified against official authorities.": "Orientación derivada de un conjunto de datos, no verificada individualmente con las autoridades oficiales.",
-  "No usable rule for this passport and destination. Missing data does not mean visa-free.": "No hay una regla disponible para este pasaporte y destino. La falta de datos no significa entrada sin visa.",
-  "Passport-specific document requirements are not available in this workbook.": "Este archivo no contiene requisitos de documentos específicos para cada pasaporte.",
-  "General guidance — not confirmed entry requirements": "Orientación general — no son requisitos de entrada confirmados",
-  "Ask the destination authority about passport validity, visa/eVisa/ETA applications, stay limits, return tickets, accommodation, funds, insurance and vaccinations. Applicability has not been confirmed for this pair.": "Consulta con la autoridad del destino sobre vigencia del pasaporte, solicitudes de visa/eVisa/ETA, límites de estadía, tiquetes de regreso, alojamiento, fondos, seguro y vacunas. No se ha confirmado su aplicación para esta combinación.",
-  "Confirm eligibility for your passport with the destination authority. Links open in a new tab.": "Confirma la elegibilidad de tu pasaporte con la autoridad del destino. Los enlaces se abren en una pestaña nueva.",
+  "Dataset-derived guidance, not individually verified against official authorities.":
+    "Orientación derivada de un conjunto de datos, no verificada individualmente con las autoridades oficiales.",
+  "No usable rule for this passport and destination. Missing data does not mean visa-free.":
+    "No hay una regla disponible para este pasaporte y destino. La falta de datos no significa entrada sin visa.",
+  "Passport-specific document requirements are not available in this workbook.":
+    "Este archivo no contiene requisitos de documentos específicos para cada pasaporte.",
+  "General guidance — not confirmed entry requirements":
+    "Orientación general — no son requisitos de entrada confirmados",
+  "Ask the destination authority about passport validity, visa/eVisa/ETA applications, stay limits, return tickets, accommodation, funds, insurance and vaccinations. Applicability has not been confirmed for this pair.":
+    "Consulta con la autoridad del destino sobre vigencia del pasaporte, solicitudes de visa/eVisa/ETA, límites de estadía, tiquetes de regreso, alojamiento, fondos, seguro y vacunas. No se ha confirmado su aplicación para esta combinación.",
+  "Confirm eligibility for your passport with the destination authority. Links open in a new tab.":
+    "Confirma la elegibilidad de tu pasaporte con la autoridad del destino. Los enlaces se abren en una pestaña nueva.",
   "Original workbook audit fields": "Campos originales de auditoría del archivo",
-  "Inherited workbook date — not an official review": "Fecha heredada del archivo — no es una revisión oficial",
-  "Passport-issuer authority links are not supplied. New sources require licensing, provenance, update cadence and field-definition review before use.": "No se proporcionaron enlaces de las autoridades emisoras de pasaportes. Las nuevas fuentes requieren revisión de licencia, procedencia, frecuencia de actualización y definición de campos antes de usarse.",
+  "Inherited workbook date — not an official review":
+    "Fecha heredada del archivo — no es una revisión oficial",
+  "Passport-issuer authority links are not supplied. New sources require licensing, provenance, update cadence and field-definition review before use.":
+    "No se proporcionaron enlaces de las autoridades emisoras de pasaportes. Las nuevas fuentes requieren revisión de licencia, procedencia, frecuencia de actualización y definición de campos antes de usarse.",
   "Interactive passport-aware travel globe": "Globo interactivo de viajes según el pasaporte",
 
   // Categories
@@ -55,7 +93,8 @@ const ES: Record<string, string> = {
     "Solo pasaporte: no se requiere visa ni autorización electrónica para una visita turística corta.",
   "Obtain the visa after arriving at the destination — apply and pay at the border.":
     "La visa se obtiene al llegar al destino: se solicita y se paga en la frontera.",
-  "Complete an online visa application before traveling.": "Completa una solicitud de visa en línea antes de viajar.",
+  "Complete an online visa application before traveling.":
+    "Completa una solicitud de visa en línea antes de viajar.",
   "Electronic travel authorization, tourist registration or arrival card required before travel.":
     "Se requiere autorización electrónica de viaje, registro turístico o tarjeta de llegada antes de viajar.",
   "Traditional visa through an embassy or consulate application required before travel.":
@@ -158,9 +197,11 @@ const LONG: Record<Lang, Record<string, string>> = {
       "Entry requirements can change at short notice. Always verify current requirements with the destination's official immigration or foreign ministry website — and with your airline — before traveling. This guide is an information tool, not a visa service.",
     aboutPrivacy:
       "Paisa Planner collects nothing: no passport numbers, no dates of birth, no payment details. The map and country data are cached on your device so the guide keeps working offline.",
-    homeBody: "This is the passport's home country. {passport} citizens don't need a visa to enter or stay.",
+    homeBody:
+      "This is the passport's home country. {passport} citizens don't need a visa to enter or stay.",
     confirmEmbassy: "Confirm with the embassy or consulate of {name} before travel.",
-    climateNote: "Long-term averages near the geographic centre of {name} (NASA POWER climatology). Coasts and mountains can differ.",
+    climateNote:
+      "Long-term averages near the geographic centre of {name} (NASA POWER climatology). Coasts and mountains can differ.",
   },
   es: {
     aboutIntro:
@@ -171,20 +212,48 @@ const LONG: Record<Lang, Record<string, string>> = {
       "Los requisitos de entrada pueden cambiar sin previo aviso. Verifica siempre los requisitos vigentes en el sitio oficial de migración o cancillería del destino, y con tu aerolínea, antes de viajar. Esta guía es una herramienta informativa, no un servicio de visas.",
     aboutPrivacy:
       "Paisa Planner no recopila nada: ni números de pasaporte, ni fechas de nacimiento, ni datos de pago. El mapa y los datos se guardan en tu dispositivo para que la guía funcione sin conexión.",
-    homeBody: "Este es el país de origen del pasaporte. Los ciudadanos de {passport} no necesitan visa para entrar ni quedarse.",
+    homeBody:
+      "Este es el país de origen del pasaporte. Los ciudadanos de {passport} no necesitan visa para entrar ni quedarse.",
     confirmEmbassy: "Confirma con la embajada o el consulado de {name} antes de viajar.",
-    climateNote: "Promedios de largo plazo cerca del centro geográfico de {name} (climatología NASA POWER). Las costas y montañas pueden variar.",
+    climateNote:
+      "Promedios de largo plazo cerca del centro geográfico de {name} (climatología NASA POWER). Las costas y montañas pueden variar.",
   },
 };
 
 export const MONTHS: Record<Lang, { short: string[]; full: string[] }> = {
   en: {
     short: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-    full: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+    full: [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ],
   },
   es: {
     short: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
-    full: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"],
+    full: [
+      "Enero",
+      "Febrero",
+      "Marzo",
+      "Abril",
+      "Mayo",
+      "Junio",
+      "Julio",
+      "Agosto",
+      "Septiembre",
+      "Octubre",
+      "Noviembre",
+      "Diciembre",
+    ],
   },
 };
 
@@ -192,7 +261,11 @@ export function translate(lang: Lang, s: string) {
   return lang === "es" ? (ES[s] ?? s) : s;
 }
 
-export function longText(lang: Lang, key: keyof (typeof LONG)["en"], vars: Record<string, string> = {}) {
+export function longText(
+  lang: Lang,
+  key: keyof (typeof LONG)["en"],
+  vars: Record<string, string> = {},
+) {
   return (LONG[lang][key] ?? "").replace(/\{(\w+)\}/g, (_, k: string) => vars[k] ?? "");
 }
 
@@ -252,7 +325,13 @@ export function LangProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<Ctx>(
-    () => ({ lang, chosen, setLang, t: (s) => translate(lang, s), name: (c) => localName(lang, c) }),
+    () => ({
+      lang,
+      chosen,
+      setLang,
+      t: (s) => translate(lang, s),
+      name: (c) => localName(lang, c),
+    }),
     [lang, chosen, setLang],
   );
   return <LangContext.Provider value={value}>{children}</LangContext.Provider>;

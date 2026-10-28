@@ -72,7 +72,10 @@ function MobileSheet({ country, onClose }: { country: CountryEntry; onClose: () 
     const cur = offsets[snap] + info.offset.y + info.velocity.y * 0.2;
     if (cur > offsets.peek + 60) return onClose();
     const order: Snap[] = ["full", "half", "peek"];
-    const next = order.reduce((best, s) => (Math.abs(offsets[s] - cur) < Math.abs(offsets[best] - cur) ? s : best), snap);
+    const next = order.reduce(
+      (best, s) => (Math.abs(offsets[s] - cur) < Math.abs(offsets[best] - cur) ? s : best),
+      snap,
+    );
     setSnap(next);
     controls.start({ y: offsets[next], transition: SPRING });
   };
@@ -100,7 +103,10 @@ function MobileSheet({ country, onClose }: { country: CountryEntry; onClose: () 
       >
         <span className="h-1 w-9 rounded-full bg-foreground/25" />
       </button>
-      <div className={`flex-1 ${snap === "full" ? "overflow-y-auto" : "overflow-hidden"}`} onPointerDownCapture={(e) => snap === "full" && e.stopPropagation()}>
+      <div
+        className={`flex-1 ${snap === "full" ? "overflow-y-auto" : "overflow-hidden"}`}
+        onPointerDownCapture={(e) => snap === "full" && e.stopPropagation()}
+      >
         <Content country={country} onClose={onClose} />
       </div>
     </motion.aside>
@@ -121,46 +127,121 @@ function Content({ country, onClose }: { country: CountryEntry; onClose: () => v
     <div className="px-6 pb-[max(env(safe-area-inset-bottom),1.5rem)] pt-3 lg:pt-7">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="mono text-faint">{country.iso3} · {t(country.region)}</p>
+          <p className="mono text-faint">
+            {country.iso3} · {t(country.region)}
+          </p>
           <h2 className="masthead mt-1 text-[28px] leading-tight text-foreground">
-            <span className={`fi fi-${country.code.toLowerCase()} mr-2 text-xl`} aria-hidden />{cname}
+            <span className={`fi fi-${country.code.toLowerCase()} mr-2 text-xl`} aria-hidden />
+            {cname}
           </h2>
         </div>
-        <Button variant="ghost" onClick={onClose} aria-label={t("Close")} className="tap-target shrink-0 rounded-full">✕</Button>
+        <Button
+          variant="ghost"
+          onClick={onClose}
+          aria-label={t("Close")}
+          className="tap-target shrink-0 rounded-full"
+        >
+          ✕
+        </Button>
       </div>
-      <p className="mono mt-4" style={{ color: `var(${meta.colorVar})` }}>{t(meta.label)}</p>
+      <p className="mono mt-4" style={{ color: `var(${meta.colorVar})` }}>
+        {t(meta.label)}
+      </p>
       <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-        {t(known ? "Dataset-derived guidance, not individually verified against official authorities." : "No usable rule for this passport and destination. Missing data does not mean visa-free.")}
+        {t(
+          known
+            ? "Dataset-derived guidance, not individually verified against official authorities."
+            : "No usable rule for this passport and destination. Missing data does not mean visa-free.",
+        )}
       </p>
       <Section title={t("Entry")}>
         <Row k={t("Passport")} v={name(passport)} />
         <Row k={t("Type")} v={t(meta.label)} />
-        {known && <Row k={t("Stay")} v={home ? t("No limit") : maxStayText(resolved, lang) ?? t("Not available")} />}
+        {known && (
+          <Row
+            k={t("Stay")}
+            v={home ? t("No limit") : (maxStayText(resolved, lang) ?? t("Not available"))}
+          />
+        )}
       </Section>
-      {home && <p className="mt-4 text-sm text-muted-foreground">{t("Home-country logic, not a visa-policy record")}</p>}
+      {home && (
+        <p className="mt-4 text-sm text-muted-foreground">
+          {t("Home-country logic, not a visa-policy record")}
+        </p>
+      )}
       <ClimateCard code={country.code} name={cname} />
-      {rule.entry_conditions_notes && !home && <Section title={t("Source conditions")}><p className="py-3 text-sm text-muted-foreground">{rule.entry_conditions_notes}</p>{lang === "es" && <p className="pb-3 text-xs text-muted-foreground">{t("Original source note (English)")}</p>}</Section>}
+      {rule.entry_conditions_notes && !home && (
+        <Section title={t("Source conditions")}>
+          <p className="py-3 text-sm text-muted-foreground">{rule.entry_conditions_notes}</p>
+          {lang === "es" && (
+            <p className="pb-3 text-xs text-muted-foreground">
+              {t("Original source note (English)")}
+            </p>
+          )}
+        </Section>
+      )}
       <Section title={t("Travel documents")}>
-        <p className="py-3 text-sm leading-relaxed text-muted-foreground">{t("Passport-specific document requirements are not available in this workbook.")}</p>
+        <p className="py-3 text-sm leading-relaxed text-muted-foreground">
+          {t("Passport-specific document requirements are not available in this workbook.")}
+        </p>
       </Section>
       <details className="mt-4 border-b border-border pb-3">
-        <summary className="tap-target flex cursor-pointer items-center text-sm text-foreground">{t("General guidance — not confirmed entry requirements")}</summary>
-        <p className="text-sm leading-relaxed text-muted-foreground">{t("Ask the destination authority about passport validity, visa/eVisa/ETA applications, stay limits, return tickets, accommodation, funds, insurance and vaccinations. Applicability has not been confirmed for this pair.")}</p>
+        <summary className="tap-target flex cursor-pointer items-center text-sm text-foreground">
+          {t("General guidance — not confirmed entry requirements")}
+        </summary>
+        <p className="text-sm leading-relaxed text-muted-foreground">
+          {t(
+            "Ask the destination authority about passport validity, visa/eVisa/ETA applications, stay limits, return tickets, accommodation, funds, insurance and vaccinations. Applicability has not been confirmed for this pair.",
+          )}
+        </p>
       </details>
       <Section title={t("Data & sources")}>
-        <Row k={t("Coverage")} v={t(home ? "Home-country logic" : known ? "Partial — imported" : "Missing")} />
+        <Row
+          k={t("Coverage")}
+          v={t(home ? "Home-country logic" : known ? "Partial — imported" : "Missing")}
+        />
         <Row k={t("Official verification")} v={t("Not yet verified")} />
-        {rule.source_as_of && <Row k={t("Source date")} v={formatVerified(rule.source_as_of, lang)} mono />}
-        {rule.source_dataset && <p className="py-3 break-words text-xs text-muted-foreground">{t("Source")}: {rule.source_dataset}</p>}
+        {rule.source_as_of && (
+          <Row k={t("Source date")} v={formatVerified(rule.source_as_of, lang)} mono />
+        )}
+        {rule.source_dataset && (
+          <p className="py-3 break-words text-xs text-muted-foreground">
+            {t("Source")}: {rule.source_dataset}
+          </p>
+        )}
       </Section>
       <details className="mt-4">
-        <summary className="tap-target flex cursor-pointer items-center text-sm text-muted-foreground">{t("Provenance")}</summary>
-        <p className="break-words text-xs leading-relaxed text-muted-foreground">{t("Original workbook audit fields")}: {rule.verification_status} · {rule.provenance_notes}</p>
-        {rule.rule_last_verified && <p className="mt-2 text-xs text-muted-foreground">{t("Inherited workbook date — not an official review")}: {rule.rule_last_verified}</p>}
+        <summary className="tap-target flex cursor-pointer items-center text-sm text-muted-foreground">
+          {t("Provenance")}
+        </summary>
+        <p className="break-words text-xs leading-relaxed text-muted-foreground">
+          {t("Original workbook audit fields")}: {rule.verification_status} ·{" "}
+          {rule.provenance_notes}
+        </p>
+        {rule.rule_last_verified && (
+          <p className="mt-2 text-xs text-muted-foreground">
+            {t("Inherited workbook date — not an official review")}: {rule.rule_last_verified}
+          </p>
+        )}
       </details>
       <div className="mt-6">
-        {sourceUrl ? <a href={sourceUrl} target="_blank" rel="noopener noreferrer" className="tap-target flex items-center justify-center gap-2 rounded-2xl bg-foreground px-4 py-3.5 text-sm font-semibold text-background">{t("Official entry information")} ↗</a> : <p className="text-sm text-muted-foreground">{t("Official source needs verification")}</p>}
-        <p className="mt-3 text-xs leading-relaxed text-muted-foreground">{t("Confirm eligibility for your passport with the destination authority. Links open in a new tab.")}</p>
+        {sourceUrl ? (
+          <a
+            href={sourceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="tap-target flex items-center justify-center gap-2 rounded-2xl bg-foreground px-4 py-3.5 text-sm font-semibold text-background"
+          >
+            {t("Official entry information")} ↗
+          </a>
+        ) : (
+          <p className="text-sm text-muted-foreground">{t("Official source needs verification")}</p>
+        )}
+        <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+          {t(
+            "Confirm eligibility for your passport with the destination authority. Links open in a new tab.",
+          )}
+        </p>
       </div>
     </div>
   );
@@ -179,7 +260,9 @@ function Row({ k, v, mono }: { k: string; v: string; mono?: boolean }) {
   return (
     <div className="flex items-center justify-between gap-4 py-3">
       <span className="text-sm text-muted-foreground">{k}</span>
-      <span className={mono ? "mono text-foreground/85" : "text-right text-sm text-foreground"}>{v}</span>
+      <span className={mono ? "mono text-foreground/85" : "text-right text-sm text-foreground"}>
+        {v}
+      </span>
     </div>
   );
 }

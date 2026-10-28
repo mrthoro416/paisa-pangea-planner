@@ -39,7 +39,10 @@ interface Label {
   rank: number;
 }
 
-export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selectedCode, filter, vibe, onSelect }, ref) {
+export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap(
+  { selectedCode, filter, vibe, onSelect },
+  ref,
+) {
   const countries = useVisaCountries();
   const el = useRef<HTMLDivElement>(null);
   const fallbackRef = useRef<CompatibleGlobeHandle>(null);
@@ -47,7 +50,9 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
   const [useFallback, setUseFallback] = useState(false);
   const [ready, setReady] = useState(false);
   const { t, name } = useLang();
-  const [labels, setLabels] = useState<Array<Label & { x: number; y: number; mode: "code" | "name" }>>([]);
+  const [labels, setLabels] = useState<
+    Array<Label & { x: number; y: number; mode: "code" | "name" }>
+  >([]);
   const [hover, setHover] = useState<{ x: number; y: number; c: CountryEntry } | null>(null);
   const onSelectRef = useRef(onSelect);
   onSelectRef.current = onSelect;
@@ -58,7 +63,9 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
     let disposed = false;
     reduced.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const isAppleMobile = /iP(?:ad|hone|od)/i.test(navigator.userAgent);
-    const isDesktopSafari = /AppleWebKit/i.test(navigator.userAgent) && !/(Chrome|Chromium|Edg|OPR)/i.test(navigator.userAgent);
+    const isDesktopSafari =
+      /AppleWebKit/i.test(navigator.userAgent) &&
+      !/(Chrome|Chromium|Edg|OPR)/i.test(navigator.userAgent);
     const isWebKit = isAppleMobile || isDesktopSafari;
     if (isWebKit) {
       setUseFallback(true);
@@ -70,7 +77,9 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
       const [maplibregl, workerUrl, topo] = await Promise.all([
         import("maplibre-gl"),
         // ?worker&url bundles the worker with its shared chunk so production never 404s.
-        import("maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url").then((m) => m.default as string),
+        import("maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url").then(
+          (m) => m.default as string,
+        ),
         fetch("/data/world-50m.json").then((r) => r.json()),
       ]);
       await import("maplibre-gl/dist/maplibre-gl.css");
@@ -82,10 +91,16 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
       fc.features.forEach((f, i) => {
         const entry = countryByNumeric.get(String(f.id ?? ""));
         f.id = i + 1;
-        f.properties = { code: entry?.code ?? "", cat: entry ? (isHomeCountry(entry) ? "home" : entry.category) : "none" };
+        f.properties = {
+          code: entry?.code ?? "",
+          cat: entry ? (isHomeCountry(entry) ? "home" : entry.category) : "none",
+        };
       });
 
-      const colors: Record<string, string> = { ...Object.fromEntries(Object.values(CATEGORIES).map((m) => [m.key, cssVar(m.colorVar)])), home: "#e8c25a" };
+      const colors: Record<string, string> = {
+        ...Object.fromEntries(Object.values(CATEGORIES).map((m) => [m.key, cssVar(m.colorVar)])),
+        home: "#e8c25a",
+      };
       labelData.current = COUNTRIES.filter((c) => c.lat != null && c.lng != null).map((c, i) => ({
         code: c.code,
         iso3: c.iso3,
@@ -102,7 +117,9 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
           version: 8,
           projection: { type: "globe" },
           sources: {},
-          layers: [{ id: "bg", type: "background", paint: { "background-color": cssVar("--background") } }],
+          layers: [
+            { id: "bg", type: "background", paint: { "background-color": cssVar("--background") } },
+          ],
           sky: {
             "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 0.6, 5, 0.2, 7, 0],
             "sky-color": "#08080a",
@@ -140,7 +157,8 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
           "match",
           ["coalesce", ["feature-state", "cat"], ["get", "cat"]],
           ...Object.entries(colors).flat(),
-          "unknown", cssVar("--muted-foreground"),
+          "unknown",
+          cssVar("--muted-foreground"),
           "#2c2c35",
         ] as never;
         map.addLayer({
@@ -213,29 +231,43 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
 
       let hoverId: number | null = null;
       const setHoverId = (id: number | null) => {
-        if (hoverId != null) map.setFeatureState({ source: "countries", id: hoverId }, { hover: false });
+        if (hoverId != null)
+          map.setFeatureState({ source: "countries", id: hoverId }, { hover: false });
         hoverId = id;
         if (id != null) map.setFeatureState({ source: "countries", id }, { hover: true });
       };
       const entryOf = (f?: MapGeoJSONFeature) =>
-        f ? COUNTRIES.find((c) => c.code === (f.properties as { code?: string }).code) ?? null : null;
+        f
+          ? (COUNTRIES.find((c) => c.code === (f.properties as { code?: string }).code) ?? null)
+          : null;
 
-      map.on("mousemove", "fill", (e: { features?: MapGeoJSONFeature[]; point: { x: number; y: number } }) => {
-        const f = e.features?.[0];
-        const c = entryOf(f);
-        setHoverId(c ? (f?.id as number) : null);
-        map.getCanvas().style.cursor = c ? "pointer" : "";
-        setHover(c ? { x: e.point.x, y: e.point.y, c } : null);
-      });
+      map.on(
+        "mousemove",
+        "fill",
+        (e: { features?: MapGeoJSONFeature[]; point: { x: number; y: number } }) => {
+          const f = e.features?.[0];
+          const c = entryOf(f);
+          setHoverId(c ? (f?.id as number) : null);
+          map.getCanvas().style.cursor = c ? "pointer" : "";
+          setHover(c ? { x: e.point.x, y: e.point.y, c } : null);
+        },
+      );
       map.on("mouseleave", "fill", () => {
         setHoverId(null);
         setHover(null);
         map.getCanvas().style.cursor = "";
       });
-      map.on("click", (e: { point: Parameters<MLMap["project"]>[0] extends never ? never : import("maplibre-gl").Point }) => {
-        const f = map.queryRenderedFeatures(e.point, { layers: ["fill"] })[0];
-        onSelectRef.current(entryOf(f));
-      });
+      map.on(
+        "click",
+        (e: {
+          point: Parameters<MLMap["project"]>[0] extends never
+            ? never
+            : import("maplibre-gl").Point;
+        }) => {
+          const f = map.queryRenderedFeatures(e.point, { layers: ["fill"] })[0];
+          onSelectRef.current(entryOf(f));
+        },
+      );
 
       const updateLabels = () => {
         const z = map.getZoom();
@@ -255,8 +287,16 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
           const p = map.project([l.lng, l.lat]);
           if (p.x < 0 || p.y < 0 || p.x > width || p.y > height) continue;
           const w = mode === "name" ? l.name.length * 6.6 + 16 : 62;
-          const box: [number, number, number, number] = [p.x - w / 2, p.y - 10, p.x + w / 2, p.y + 10];
-          if (boxes.some((b) => !(box[2] < b[0] || box[0] > b[2] || box[3] < b[1] || box[1] > b[3]))) continue;
+          const box: [number, number, number, number] = [
+            p.x - w / 2,
+            p.y - 10,
+            p.x + w / 2,
+            p.y + 10,
+          ];
+          if (
+            boxes.some((b) => !(box[2] < b[0] || box[0] > b[2] || box[3] < b[1] || box[1] > b[3]))
+          )
+            continue;
           boxes.push(box);
           out.push({ ...l, x: p.x, y: p.y, mode });
           if (out.length > 60) break;
@@ -303,41 +343,57 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
         {
           cat: entry ? (isHomeCountry(entry) ? "home" : entry.category) : "none",
           selected: code !== "" && code === selectedCode,
-          dim: (filter !== "all" || vibe != null) && (!entry || !test(entry) || !matchesVibe(entry, vibe ?? null)),
+          dim:
+            (filter !== "all" || vibe != null) &&
+            (!entry || !test(entry) || !matchesVibe(entry, vibe ?? null)),
         },
       );
     }
   }, [ready, selectedCode, filter, vibe, countries]);
 
-  useImperativeHandle(ref, () => ({
-    resetView: () => {
-      if (useFallback) {
-        fallbackRef.current?.resetView();
-        return;
-      }
-      mapRef.current?.flyTo({ ...HOME, duration: reduced.current ? 0 : 1600, essential: true });
-    },
-    flyTo: (c) => {
-      if (useFallback) {
-        fallbackRef.current?.flyTo(c);
-        return;
-      }
-      const map = mapRef.current;
-      if (!map || c.lat == null || c.lng == null) return;
-      const mobile = window.innerWidth < 1024;
-      map.flyTo({
-        center: [c.lng, c.lat],
-        zoom: 3.2,
-        duration: reduced.current ? 0 : 1800,
-        curve: 1.5,
-        padding: mobile ? { top: 0, bottom: window.innerHeight * 0.4, left: 0, right: 0 } : { right: 420, top: 0, bottom: 0, left: 0 },
-        essential: true,
-      });
-    },
-  }), [useFallback]);
+  useImperativeHandle(
+    ref,
+    () => ({
+      resetView: () => {
+        if (useFallback) {
+          fallbackRef.current?.resetView();
+          return;
+        }
+        mapRef.current?.flyTo({ ...HOME, duration: reduced.current ? 0 : 1600, essential: true });
+      },
+      flyTo: (c) => {
+        if (useFallback) {
+          fallbackRef.current?.flyTo(c);
+          return;
+        }
+        const map = mapRef.current;
+        if (!map || c.lat == null || c.lng == null) return;
+        const mobile = window.innerWidth < 1024;
+        map.flyTo({
+          center: [c.lng, c.lat],
+          zoom: 3.2,
+          duration: reduced.current ? 0 : 1800,
+          curve: 1.5,
+          padding: mobile
+            ? { top: 0, bottom: window.innerHeight * 0.4, left: 0, right: 0 }
+            : { right: 420, top: 0, bottom: 0, left: 0 },
+          essential: true,
+        });
+      },
+    }),
+    [useFallback],
+  );
 
   if (useFallback) {
-    return <CompatibleGlobeMap ref={fallbackRef} selectedCode={selectedCode} filter={filter} vibe={vibe ?? null} onSelect={onSelect} />;
+    return (
+      <CompatibleGlobeMap
+        ref={fallbackRef}
+        selectedCode={selectedCode}
+        filter={filter}
+        vibe={vibe ?? null}
+        onSelect={onSelect}
+      />
+    );
   }
 
   return (
@@ -354,7 +410,11 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
           <div
             key={l.code}
             className="fade-in absolute flex items-center gap-1.5 whitespace-nowrap"
-            style={{ transform: `translate(${l.x}px, ${l.y}px) translate(-50%, -50%)`, left: 0, top: 0 }}
+            style={{
+              transform: `translate(${l.x}px, ${l.y}px) translate(-50%, -50%)`,
+              left: 0,
+              top: 0,
+            }}
           >
             {l.mode === "code" ? (
               <span
@@ -363,10 +423,19 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
                 aria-label={`${name(l)} flag`}
               />
             ) : (
-              <span className="size-1 rounded-full" style={{ background: l.color }} />
+              <span
+                className="size-1 rounded-full"
+                style={{
+                  background: `var(${categoryMeta(countries.find((c) => c.code === l.code) ?? (COUNTRIES[0] as CountryEntry)).colorVar})`,
+                }}
+              />
             )}
             <span
-              className={l.mode === "code" ? "mono text-[9.5px] text-foreground/60" : "text-[11px] font-medium text-foreground/80"}
+              className={
+                l.mode === "code"
+                  ? "mono text-[9.5px] text-foreground/60"
+                  : "text-[11px] font-medium text-foreground/80"
+              }
               style={{ textShadow: "0 1px 6px var(--background), 0 0 2px var(--background)" }}
             >
               {l.mode === "code" ? l.iso3 : name(l)}
@@ -382,9 +451,16 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap({ selec
           <p className="text-[13px] font-medium text-foreground">
             {hover.c.flag} {name(hover.c)}
           </p>
-          <p className="mono mt-0.5" style={{ color: `var(${categoryMeta(countries.find((c) => c.code === hover.c.code) ?? hover.c).colorVar})` }}>
+          <p
+            className="mono mt-0.5"
+            style={{
+              color: `var(${categoryMeta(countries.find((c) => c.code === hover.c.code) ?? hover.c).colorVar})`,
+            }}
+          >
             {t(categoryMeta(countries.find((c) => c.code === hover.c.code) ?? hover.c).label)}
-            {countries.find((c) => c.code === hover.c.code)?.maxStayDays ? ` · ${countries.find((c) => c.code === hover.c.code)?.maxStayDays} ${t("days")}` : ""}
+            {countries.find((c) => c.code === hover.c.code)?.maxStayDays
+              ? ` · ${countries.find((c) => c.code === hover.c.code)?.maxStayDays} ${t("days")}`
+              : ""}
           </p>
         </div>
       )}

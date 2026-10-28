@@ -12,20 +12,40 @@ export interface FilterDef {
 
 export const FILTERS: FilterDef[] = [
   { key: "all", label: "All", test: () => true },
-  { key: "visa_free", label: "Visa-free", test: (c) => !isHomeCountry(c) && c.category === "visa_free" },
-  { key: "visa_on_arrival", label: "On arrival", test: (c) => !isHomeCountry(c) && c.category === "visa_on_arrival" },
+  {
+    key: "visa_free",
+    label: "Visa-free",
+    test: (c) => !isHomeCountry(c) && c.category === "visa_free",
+  },
+  {
+    key: "visa_on_arrival",
+    label: "On arrival",
+    test: (c) => !isHomeCountry(c) && c.category === "visa_on_arrival",
+  },
   { key: "evisa", label: "eVisa", test: (c) => !isHomeCountry(c) && c.category === "evisa" },
   { key: "eta", label: "ETA", test: (c) => !isHomeCountry(c) && c.category === "eta" },
-  { key: "visa_required", label: "Visa req.", test: (c) => !isHomeCountry(c) && c.category === "visa_required" },
+  {
+    key: "visa_required",
+    label: "Visa req.",
+    test: (c) => !isHomeCountry(c) && c.category === "visa_required",
+  },
   {
     key: "stay90",
     label: "90+ days",
-    test: (c) => !isHomeCountry(c) && c.category !== "unknown" && c.category !== "visa_required" && (c.maxStayDays ?? 0) >= 90,
+    test: (c) =>
+      !isHomeCountry(c) &&
+      c.category !== "unknown" &&
+      c.category !== "visa_required" &&
+      (c.maxStayDays ?? 0) >= 90,
   },
   {
     key: "stay30",
     label: "30+ days",
-    test: (c) => !isHomeCountry(c) && c.category !== "unknown" && c.category !== "visa_required" && (c.maxStayDays ?? 0) >= 30,
+    test: (c) =>
+      !isHomeCountry(c) &&
+      c.category !== "unknown" &&
+      c.category !== "visa_required" &&
+      (c.maxStayDays ?? 0) >= 30,
   },
 ];
 
@@ -40,7 +60,12 @@ export function formatVerified(iso: string, lang: "en" | "es" = "en") {
   const d = new Date(iso + "T00:00:00Z");
   if (Number.isNaN(d.getTime())) return iso;
   return d
-    .toLocaleDateString(lang === "es" ? "es-CO" : "en-GB", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" })
+    .toLocaleDateString(lang === "es" ? "es-CO" : "en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      timeZone: "UTC",
+    })
     .replace(/\./g, "")
     .toUpperCase();
 }

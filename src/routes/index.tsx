@@ -29,7 +29,8 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Paisa Planner — Passport & Visa Globe" },
       {
         property: "og:description",
-        content: "Spin the globe. Explore entry categories where data exists; missing passport rules remain unknown.",
+        content:
+          "Spin the globe. Explore entry categories where data exists; missing passport rules remain unknown.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -58,7 +59,8 @@ function Index() {
   );
   const accessible = useMemo(() => countries.filter(isAccessible).length, [countries]);
   const hudCount = filter === "all" ? accessible : counts[filter];
-  const hudLabel = filter === "all" ? "without embassy visa" : filterByKey.get(filter)?.label ?? "All";
+  const hudLabel =
+    filter === "all" ? "without embassy visa" : (filterByKey.get(filter)?.label ?? "All");
 
   const reset = () => {
     setSelected(null);
