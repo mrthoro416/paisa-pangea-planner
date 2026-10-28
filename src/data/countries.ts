@@ -7,7 +7,11 @@ export type EntryCategory =
   | "visa_on_arrival"
   | "evisa"
   | "eta"
-  | "visa_required";
+  | "visa_required"
+  | "freedom_of_movement"
+  | "travel_permit_required"
+  | "entry_banned"
+  | "unknown";
 
 export interface CountryEntry {
   code: string; // ISO 3166-1 alpha-2
@@ -32,6 +36,14 @@ export interface CountryEntry {
 export const PASSPORT = { code: "CO", name: "Colombia", flag: "🇨🇴" } as const;
 
 export const COUNTRIES: CountryEntry[] = [
+  {
+    code: "XK", iso3: "UNK", numeric: "-99",
+    name: "Kosovo", officialName: "Republic of Kosovo",
+    region: "Europe", subregion: "Southeast Europe", flag: "🇽🇰",
+    lat: 42.666667, lng: 21.166667,
+    altNames: ["Kosova", "Republika e Kosovës", "República de Kosovo"],
+    category: "unknown", maxStayDays: null, note: null, lastVerified: "",
+  },
   {
     code: "AF", iso3: "AFG", numeric: "004",
     name: "Afghanistan", officialName: "Islamic Republic of Afghanistan",
