@@ -91,7 +91,10 @@ export function stayLength(c: Pick<CountryEntry, "maxStayDays">, lang: Lang = "e
   return lang === "es" ? `${d} día${d === 1 ? "" : "s"}` : `${d} day${d === 1 ? "" : "s"}`;
 }
 
-export function maxStayText(c: Pick<CountryEntry, "maxStayDays">, lang: Lang = "en"): string | null {
+export function maxStayText(
+  c: Pick<CountryEntry, "maxStayDays">,
+  lang: Lang = "en",
+): string | null {
   const s = stayLength(c, lang);
   if (!s) return null;
   return lang === "es" ? `Hasta ${s}` : `Up to ${s}`;

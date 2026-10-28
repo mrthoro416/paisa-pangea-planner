@@ -117,8 +117,7 @@ export function CommandSearch({ open, onOpenChange, onPickCountry, onPickFilter 
     if (r.kind === "country") {
       const destination = COUNTRIES.find((c) => c.code === r.c.code);
       if (destination) onPickCountry(destination);
-    }
-    else onPickFilter(r.key, r.region);
+    } else onPickFilter(r.key, r.region);
   };
 
   return (
