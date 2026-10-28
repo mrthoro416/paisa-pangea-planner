@@ -25,7 +25,8 @@ export const CATEGORIES: Record<EntryCategory, CategoryMeta> = {
     key: "visa_free",
     label: "Visa-free",
     short: "Visa-free",
-    description: "Passport only — no visa or electronic authorization required for a standard short-term tourist visit.",
+    description:
+      "Passport only — no visa or electronic authorization required for a standard short-term tourist visit.",
     colorVar: "--cat-green",
   },
   visa_on_arrival: {
@@ -46,20 +47,34 @@ export const CATEGORIES: Record<EntryCategory, CategoryMeta> = {
     key: "eta",
     label: "ETA / Authorization",
     short: "ETA",
-    description: "Electronic travel authorization, tourist registration or arrival card required before travel.",
+    description:
+      "Electronic travel authorization, tourist registration or arrival card required before travel.",
     colorVar: "--cat-yellow",
   },
   visa_required: {
     key: "visa_required",
     label: "Visa required",
     short: "Visa required",
-    description: "Traditional visa through an embassy or consulate application required before travel.",
+    description:
+      "Traditional visa through an embassy or consulate application required before travel.",
     colorVar: "--cat-orange",
   },
 };
 
-export const UNKNOWN_META = { key: "unknown", label: "Visa information not available", short: "Unknown", description: "Not yet verified", colorVar: "--muted-foreground" } as const;
-export const HOME_META = { key: "home_country", label: "Home country", short: "Home country", description: "Home-country logic, not a visa-policy record", colorVar: "--beacon" } as const;
+export const UNKNOWN_META = {
+  key: "unknown",
+  label: "Visa information not available",
+  short: "Unknown",
+  description: "Not yet verified",
+  colorVar: "--muted-foreground",
+} as const;
+export const HOME_META = {
+  key: "home_country",
+  label: "Home country",
+  short: "Home country",
+  description: "Home-country logic, not a visa-policy record",
+  colorVar: "--beacon",
+} as const;
 export function categoryMeta(c: CountryEntry | VisaCountry) {
   if (isHomeCountry(c)) return HOME_META;
   return c.category === "unknown" ? UNKNOWN_META : CATEGORIES[c.category];
@@ -128,8 +143,11 @@ export function requirementItems(c: CountryEntry, lang: Lang = "en"): string[] {
   const items: string[] = [];
   switch (c.category) {
     case "visa_free":
-      items.push("Passport valid for the duration of the stay — many countries require 6 months' validity");
-      if ((c.maxStayDays ?? 0) > 30) items.push("Return or onward ticket may be requested at check-in or arrival");
+      items.push(
+        "Passport valid for the duration of the stay — many countries require 6 months' validity",
+      );
+      if ((c.maxStayDays ?? 0) > 30)
+        items.push("Return or onward ticket may be requested at check-in or arrival");
       items.push("Proof of accommodation and sufficient funds may be requested");
       if (c.maxStayDays != null) items.push(`Maximum stay: ${stayLength(c)} per visit`);
       break;
@@ -146,13 +164,17 @@ export function requirementItems(c: CountryEntry, lang: Lang = "en"): string[] {
       items.push("Print or save the approved eVisa to show at check-in and the border");
       break;
     case "eta":
-      items.push("Authorization must be approved before boarding — most are processed quickly online");
+      items.push(
+        "Authorization must be approved before boarding — most are processed quickly online",
+      );
       items.push("Passport valid for the duration of the stay");
       items.push("Return/onward ticket may be requested by the carrier");
       break;
     case "visa_required":
       items.push("Apply at an embassy or consulate (or its official visa centre) before travel");
-      items.push("Applications typically require invitation letters, itinerary and bank statements");
+      items.push(
+        "Applications typically require invitation letters, itinerary and bank statements",
+      );
       items.push("Processing can take weeks — apply well in advance");
       items.push("Passport validity beyond 6 months is commonly required");
       break;
@@ -161,7 +183,11 @@ export function requirementItems(c: CountryEntry, lang: Lang = "en"): string[] {
   return items;
 }
 
-export function requirementSummary(c: CountryEntry, lang: Lang = "en", name: string = c.name): string {
+export function requirementSummary(
+  c: CountryEntry,
+  lang: Lang = "en",
+  name: string = c.name,
+): string {
   const stayTxt = stayLength(c, lang);
   if (lang === "es") {
     switch (c.category) {
@@ -198,5 +224,7 @@ export function officialSource(c: CountryEntry): OfficialSource | null {
 
 /** The passport's own country: citizens enter freely, so it is never a visa destination. */
 export function isHomeCountry(c: CountryEntry | VisaCountry) {
-  return "rule" in c ? c.rule.entry_permission === "home_country" && c.rule.coverage_status === "logic_only" : c.code === PASSPORT.code;
+  return "rule" in c
+    ? c.rule.entry_permission === "home_country" && c.rule.coverage_status === "logic_only"
+    : c.code === PASSPORT.code;
 }

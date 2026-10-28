@@ -14,7 +14,11 @@ interface Props {
   onPickFilter: (k: FilterKey, region?: string) => void;
 }
 
-const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+const norm = (s: string) =>
+  s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
 
 const FILTER_WORDS: Array<[RegExp, FilterKey]> = [
   [/visa[\s-]?free|no visa|sin visa/, "visa_free"],
@@ -56,30 +60,52 @@ export function CommandSearch({ open, onOpenChange, onPickCountry, onPickFilter 
 
   const results = useMemo(() => {
     const n = norm(q.trim());
-    type R = { kind: "filter"; key: FilterKey; region?: string | undefined; label: string } | { kind: "country"; c: VisaCountry };
+    type R =
+      | { kind: "filter"; key: FilterKey; region?: string | undefined; label: string }
+      | { kind: "country"; c: VisaCountry };
     const out: R[] = [];
-    if (!n) return countries.filter((c) => ["JP", "BR", "ES", "US", "MX", "TH"].includes(c.code)).map((c) => ({ kind: "country", c }) as R);
+    if (!n)
+      return countries
+        .filter((c) => ["JP", "BR", "ES", "US", "MX", "TH"].includes(c.code))
+        .map((c) => ({ kind: "country", c }) as R);
     const fk = FILTER_WORDS.find(([re]) => re.test(n))?.[1];
     const region = REGIONS.find((r) => n.includes(norm(r)) || n.includes(norm(t(r))));
     if (fk) {
       const label = t(FILTERS.find((f) => f.key === fk)?.label ?? "All");
-      out.push({ kind: "filter", key: fk, region, label: region ? `${label} · ${t(region)}` : `${label} · ${t("destinations")}` });
+      out.push({
+        kind: "filter",
+        key: fk,
+        region,
+        label: region ? `${label} · ${t(region)}` : `${label} · ${t("destinations")}`,
+      });
     } else if (region) {
       out.push({ kind: "filter", key: "all", region, label: `${t("Fly to")} ${t(region)}` });
     }
-    const countryQ = n.replace(/passport|pasaporte|sin visa|visa[\s-]?free|destinations?|destinos?|\bdays?\b|\bdias?\b|\d+/g, "").trim();
-    const matches = countries.filter((c) => {
-      if (!countryQ) return fk && (!region || c.region === region) && FILTERS.find((f) => f.key === fk)?.test(c);
-      return (
-        norm(c.name).includes(countryQ) ||
-        norm(name(c)).includes(countryQ) ||
-        c.code.toLowerCase() === countryQ ||
-        c.iso3.toLowerCase() === countryQ ||
-        c.altNames.some((a) => norm(a).includes(countryQ)) ||
-        norm(c.subregion).includes(countryQ)
-      );
-    })
-      .sort((a, b) => Number(!norm(name(a)).startsWith(countryQ)) - Number(!norm(name(b)).startsWith(countryQ)))
+    const countryQ = n
+      .replace(
+        /passport|pasaporte|sin visa|visa[\s-]?free|destinations?|destinos?|\bdays?\b|\bdias?\b|\d+/g,
+        "",
+      )
+      .trim();
+    const matches = countries
+      .filter((c) => {
+        if (!countryQ)
+          return (
+            fk && (!region || c.region === region) && FILTERS.find((f) => f.key === fk)?.test(c)
+          );
+        return (
+          norm(c.name).includes(countryQ) ||
+          norm(name(c)).includes(countryQ) ||
+          c.code.toLowerCase() === countryQ ||
+          c.iso3.toLowerCase() === countryQ ||
+          c.altNames.some((a) => norm(a).includes(countryQ)) ||
+          norm(c.subregion).includes(countryQ)
+        );
+      })
+      .sort(
+        (a, b) =>
+          Number(!norm(name(a)).startsWith(countryQ)) - Number(!norm(name(b)).startsWith(countryQ)),
+      )
       .slice(0, 12);
     return [...out, ...matches.map((c) => ({ kind: "country", c }) as R)];
   }, [q, t, name, countries]);
@@ -126,8 +152,10 @@ export function CommandSearch({ open, onOpenChange, onPickCountry, onPickFilter 
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Escape") onOpenChange(false);
-                  if (e.key === "ArrowDown") (e.preventDefault(), setActive((a) => Math.min(a + 1, results.length - 1)));
-                  if (e.key === "ArrowUp") (e.preventDefault(), setActive((a) => Math.max(a - 1, 0)));
+                  if (e.key === "ArrowDown")
+                    (e.preventDefault(), setActive((a) => Math.min(a + 1, results.length - 1)));
+                  if (e.key === "ArrowUp")
+                    (e.preventDefault(), setActive((a) => Math.max(a - 1, 0)));
                   if (e.key === "Enter") choose(active);
                 }}
                 placeholder={t("Japan, visa-free Europe, 90 days…")}
@@ -137,34 +165,73 @@ export function CommandSearch({ open, onOpenChange, onPickCountry, onPickFilter 
                 aria-controls="cmd-results"
                 className="h-14 flex-1 bg-transparent text-[17px] text-foreground outline-none placeholder:text-faint"
               />
-              <button type="button" onClick={() => onOpenChange(false)} className="mono tap-target text-muted-foreground">
+              <button
+                type="button"
+                onClick={() => onOpenChange(false)}
+                className="mono tap-target text-muted-foreground"
+              >
                 Esc
               </button>
             </div>
             <ul id="cmd-results" role="listbox" className="overflow-y-auto p-2">
               {!q && <li className="mono px-3 pb-1 pt-2 text-faint">{t("Suggested")}</li>}
-              {results.length === 0 && <li className="px-3 py-6 text-center text-sm text-muted-foreground">{t("No matches")}</li>}
+              {results.length === 0 && (
+                <li className="px-3 py-6 text-center text-sm text-muted-foreground">
+                  {t("No matches")}
+                </li>
+              )}
               {results.map((r, i) => {
                 const sel = i === active;
                 const base = `flex min-h-12 w-full cursor-pointer items-center gap-3 rounded-2xl px-3 text-left transition-colors ${sel ? "bg-accent" : ""}`;
                 if (r.kind === "filter")
                   return (
-                    <li key={"f" + r.key + r.region} role="option" aria-selected={sel} className={base} onMouseEnter={() => setActive(i)} onClick={() => choose(i)}>
-                      <span className="grid size-7 place-items-center rounded-full bg-accent text-xs" aria-hidden>◎</span>
+                    <li
+                      key={"f" + r.key + r.region}
+                      role="option"
+                      aria-selected={sel}
+                      className={base}
+                      onMouseEnter={() => setActive(i)}
+                      onClick={() => choose(i)}
+                    >
+                      <span
+                        className="grid size-7 place-items-center rounded-full bg-accent text-xs"
+                        aria-hidden
+                      >
+                        ◎
+                      </span>
                       <span className="flex-1 text-[15px] text-foreground">{r.label}</span>
                       <span className="mono text-faint">{t("Filter")}</span>
                     </li>
                   );
                 const m = categoryMeta(r.c);
                 return (
-                  <li key={r.c.code} role="option" aria-selected={sel} className={base} onMouseEnter={() => setActive(i)} onClick={() => choose(i)}>
-                    <span className="text-xl" aria-hidden>{r.c.flag}</span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[15px] text-foreground">{name(r.c)}</span>
-                      <span className="mono text-faint">{r.c.iso3} · {t(r.c.region)}</span>
+                  <li
+                    key={r.c.code}
+                    role="option"
+                    aria-selected={sel}
+                    className={base}
+                    onMouseEnter={() => setActive(i)}
+                    onClick={() => choose(i)}
+                  >
+                    <span className="text-xl" aria-hidden>
+                      {r.c.flag}
                     </span>
-                    <span className="mono flex items-center gap-1.5" style={{ color: `var(${m.colorVar})` }}>
-                      <span className="size-1.5 rounded-full" style={{ background: `var(${m.colorVar})` }} />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-[15px] text-foreground">
+                        {name(r.c)}
+                      </span>
+                      <span className="mono text-faint">
+                        {r.c.iso3} · {t(r.c.region)}
+                      </span>
+                    </span>
+                    <span
+                      className="mono flex items-center gap-1.5"
+                      style={{ color: `var(${m.colorVar})` }}
+                    >
+                      <span
+                        className="size-1.5 rounded-full"
+                        style={{ background: `var(${m.colorVar})` }}
+                      />
                       {t(m.short)}
                     </span>
                   </li>

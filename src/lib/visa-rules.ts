@@ -3,7 +3,18 @@ import { COUNTRIES, type CountryEntry, type EntryCategory } from "@/data/countri
 
 export type CoverageStatus = "partial" | "logic_only" | "missing" | "verified";
 export interface DocumentRequirement {
-  type: "passport_validity" | "visa_application" | "evisa_application" | "eta_application" | "stay_limit" | "return_ticket" | "accommodation" | "funds" | "insurance" | "vaccination" | "other";
+  type:
+    | "passport_validity"
+    | "visa_application"
+    | "evisa_application"
+    | "eta_application"
+    | "stay_limit"
+    | "return_ticket"
+    | "accommodation"
+    | "funds"
+    | "insurance"
+    | "vaccination"
+    | "other";
   status: "required" | "conditional" | "recommended" | "unknown";
   description: string;
   applicability: string;
@@ -35,9 +46,20 @@ export type VisaCountry = Omit<CountryEntry, "category"> & {
   rule: VisaRule;
 };
 export const PASSPORT_OPTIONS = matrix.passports;
-export const MATRIX_INFO = { workbook: matrix.workbook, sha256: matrix.sha256, totalPairs: matrix.total_pairs, missingPairs: matrix.missing_count };
-const records = matrix.records as unknown as Record<string, Omit<VisaRule, "document_requirements">>;
-const authorities = matrix.destination_authorities as Record<string, { name: string | null; url: string | null }>;
+export const MATRIX_INFO = {
+  workbook: matrix.workbook,
+  sha256: matrix.sha256,
+  totalPairs: matrix.total_pairs,
+  missingPairs: matrix.missing_count,
+};
+const records = matrix.records as unknown as Record<
+  string,
+  Omit<VisaRule, "document_requirements">
+>;
+const authorities = matrix.destination_authorities as Record<
+  string,
+  { name: string | null; url: string | null }
+>;
 export const pairKey = (passport: string, destination: string) => `${passport}:${destination}`;
 
 export function getVisaRule(passport: string, destination: string): VisaRule {
@@ -61,7 +83,10 @@ export function resolveVisaCountry(country: CountryEntry, passport: string): Vis
   const usable = rule.coverage_status !== "missing" && rule.entry_permission != null;
   return {
     ...country,
-    category: usable && rule.entry_permission !== "home_country" ? rule.entry_permission ?? "unknown" : "unknown",
+    category:
+      usable && rule.entry_permission !== "home_country"
+        ? (rule.entry_permission ?? "unknown")
+        : "unknown",
     maxStayDays: usable ? rule.max_stay_days : null,
     note: usable ? rule.entry_conditions_notes : null,
     rule,

@@ -18,7 +18,8 @@ export const Route = createFileRoute("/about")({
       { property: "og:title", content: "About & Data Sources — Paisa Planner" },
       {
         property: "og:description",
-        content: "Methodology, category definitions and official sources behind the Colombian passport entry guide.",
+        content:
+          "Methodology, category definitions and official sources behind the Colombian passport entry guide.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -35,7 +36,10 @@ function About() {
     n: countries.filter((c) => c.category === key).length,
   }));
   return (
-    <div className="min-h-dvh bg-background px-5 pb-16" style={{ paddingTop: "max(env(safe-area-inset-top), 1.5rem)" }}>
+    <div
+      className="min-h-dvh bg-background px-5 pb-16"
+      style={{ paddingTop: "max(env(safe-area-inset-top), 1.5rem)" }}
+    >
       <div className="mx-auto max-w-2xl">
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5" aria-label={t("Back to the map")}>
@@ -50,16 +54,25 @@ function About() {
           </Link>
         </div>
 
-        <h1 className="font-display mt-10 text-3xl font-semibold text-foreground">{t("About this guide")}</h1>
+        <h1 className="font-display mt-10 text-3xl font-semibold text-foreground">
+          {t("About this guide")}
+        </h1>
         <p className="mt-3 text-sm leading-relaxed text-foreground/85">
           {longText(lang, "aboutIntro", { passport: `${PASSPORT.flag} ${name(PASSPORT)}` })}
         </p>
 
-        <Link to="/coverage" className="tap-target mt-4 flex items-center text-sm text-beacon">{t("View coverage")} →</Link>
-        <h2 className="font-display mt-10 text-xl font-semibold text-foreground">{t("The five categories")}</h2>
+        <Link to="/coverage" className="tap-target mt-4 flex items-center text-sm text-beacon">
+          {t("View coverage")} →
+        </Link>
+        <h2 className="font-display mt-10 text-xl font-semibold text-foreground">
+          {t("The five categories")}
+        </h2>
         <ul className="mt-4 space-y-3">
           {counts.map(({ key, n }) => (
-            <li key={key} className="flex items-start gap-3 rounded-2xl border border-border bg-card p-4">
+            <li
+              key={key}
+              className="flex items-start gap-3 rounded-2xl border border-border bg-card p-4"
+            >
               <span
                 className="mt-1 size-3 shrink-0 rounded-full"
                 style={{ background: `var(${CATEGORIES[key].colorVar})` }}
@@ -68,25 +81,35 @@ function About() {
               <div>
                 <p className="text-sm font-semibold text-foreground">
                   {t(CATEGORIES[key].label)}{" "}
-                  <span className="ml-1 font-normal tabular-nums text-muted-foreground">{n} {t("destinations")}</span>
+                  <span className="ml-1 font-normal tabular-nums text-muted-foreground">
+                    {n} {t("destinations")}
+                  </span>
                 </p>
-                <p className="mt-0.5 text-sm text-muted-foreground">{t(CATEGORIES[key].description)}</p>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  {t(CATEGORIES[key].description)}
+                </p>
               </div>
             </li>
           ))}
         </ul>
 
-        <h2 className="font-display mt-10 text-xl font-semibold text-foreground">{t("Where the data comes from")}</h2>
+        <h2 className="font-display mt-10 text-xl font-semibold text-foreground">
+          {t("Where the data comes from")}
+        </h2>
         <p className="mt-3 text-sm leading-relaxed text-foreground/85">
           {longText(lang, "aboutData", { date: "2026-09-26" })}
         </p>
 
-        <h2 className="font-display mt-10 text-xl font-semibold text-foreground">{t("Verify before you travel")}</h2>
+        <h2 className="font-display mt-10 text-xl font-semibold text-foreground">
+          {t("Verify before you travel")}
+        </h2>
         <p className="mt-3 rounded-2xl border border-beacon/30 bg-beacon-soft p-4 text-sm leading-relaxed text-foreground">
           {longText(lang, "aboutVerify")}
         </p>
 
-        <h2 className="font-display mt-10 text-xl font-semibold text-foreground">{t("Your privacy")}</h2>
+        <h2 className="font-display mt-10 text-xl font-semibold text-foreground">
+          {t("Your privacy")}
+        </h2>
         <p className="mt-3 text-sm leading-relaxed text-foreground/85">
           {longText(lang, "aboutPrivacy")}
         </p>

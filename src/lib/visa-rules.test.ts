@@ -1,6 +1,12 @@
 import { describe, it } from "node:test";
 import { strict as assert } from "node:assert";
-import { coverageFor, getVisaRule, visaCountries, resolveVisaCountry, PASSPORT_OPTIONS } from "./visa-rules";
+import {
+  coverageFor,
+  getVisaRule,
+  visaCountries,
+  resolveVisaCountry,
+  PASSPORT_OPTIONS,
+} from "./visa-rules";
 import { COUNTRIES } from "../data/countries";
 import { FILTERS, isAccessible } from "./filters";
 import { isHomeCountry } from "./entry";
@@ -15,7 +21,8 @@ describe("workbook passport coverage", () => {
       const rows = visaCountries(passport);
       assert.equal(rows.filter(isAccessible).length, 0);
       assert.equal(rows.filter((c) => c.category === "unknown").length, 198);
-      for (const filter of FILTERS.filter((f) => f.key !== "all")) assert.equal(rows.filter(filter.test).length, 0);
+      for (const filter of FILTERS.filter((f) => f.key !== "all"))
+        assert.equal(rows.filter(filter.test).length, 0);
       assert.equal(getVisaRule(passport, "BR").entry_permission, null);
       assert.equal(getVisaRule(passport, "BR").max_stay_days, null);
     }
