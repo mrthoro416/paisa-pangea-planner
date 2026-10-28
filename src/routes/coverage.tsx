@@ -86,7 +86,7 @@ function Coverage() {
             placeholder={t("Search destinations")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="h-12 min-w-0 flex-1 rounded-lg border border-input bg-transparent px-3"
+            className="h-12 min-w-0 basis-full rounded-lg border border-input bg-transparent px-3 sm:flex-1 sm:basis-auto"
           />
           <select
             aria-label={t("Coverage status")}

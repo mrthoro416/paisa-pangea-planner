@@ -423,7 +423,7 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap(
                 aria-label={`${name(l)} flag`}
               />
             ) : (
-              <span className="size-1 rounded-full" style={{ background: l.color }} />
+              <span className="size-1 rounded-full" style={{ background: `var(${categoryMeta(countries.find((c) => c.code === l.code) ?? COUNTRIES[0] as CountryEntry).colorVar})` }} />
             )}
             <span
               className={

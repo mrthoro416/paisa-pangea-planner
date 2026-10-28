@@ -89,6 +89,8 @@ export function CommandSearch({ open, onOpenChange, onPickCountry, onPickFilter 
       .trim();
     const matches = countries
       .filter((c) => {
+        if (fk && !FILTERS.find((f) => f.key === fk)?.test(c)) return false;
+        if (region && c.region !== region) return false;
         if (!countryQ)
           return (
             fk && (!region || c.region === region) && FILTERS.find((f) => f.key === fk)?.test(c)
