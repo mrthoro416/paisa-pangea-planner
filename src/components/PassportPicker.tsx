@@ -127,9 +127,7 @@ function PassportSearchList({
                 <span className="block truncate text-[15px] text-foreground">{name(c)}</span>
                 <span className="mono text-faint">{c.iso3}</span>
               </span>
-              <span className="mono text-muted-foreground">
-                {t(c.code === "CO" ? "Partial" : "Missing")}
-              </span>
+              <span className="mono text-muted-foreground">{t("Planning data")}</span>
               {isCurrent && <span className="mono text-beacon">{t("Selected")}</span>}
             </li>
           );
@@ -139,13 +137,13 @@ function PassportSearchList({
   );
 }
 
-/** Shown wherever a passport is picked: the dataset only covers Colombian passports. */
+/** Passport scope and verification disclosure shared by both pickers. */
 function DataDisclosure({ className = "" }: { className?: string }) {
   const { t } = useLang();
   return (
     <p className={`text-[11px] leading-relaxed text-muted-foreground ${className}`}>
       {t(
-        "Only Colombian passport rules are imported so far. Other passports show unknown results, not Colombian rules. Confirm current eligibility with official authorities.",
+        "Choose your passport nationality, not your residence or location. Sourced planning data covers 199 passports; confirm entry rules before booking.",
       )}
     </p>
   );
@@ -235,7 +233,8 @@ export function PassportSelector() {
             }}
           />
           <p className="mono mt-3 text-muted-foreground">
-            {coverage.partial} {t("Partial")} · {coverage.missing} {t("Missing")}
+            {coverage.partial} {t("Imported")} · {coverage.unknown} {t("Unconfirmed")} ·{" "}
+            {coverage.conflicts} {t("Discrepancies")}
           </p>
           <Link
             to="/coverage"

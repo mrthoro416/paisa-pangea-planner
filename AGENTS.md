@@ -13,3 +13,4 @@
 - Use the SVG orthographic globe on Apple/WebKit browsers because MapLibre globe rendering can lose country layers there.
 - Resolve visa displays through the normalized passport/destination rule layer; keep country geography, climate and activities independent so passport changes update rules without remounting the map or resetting travel state.
 - Import workbook rows offline into source-controlled JSON with provenance; missing pairs return unknown, and imported source dates are not official verification dates.
+- Canonical global imports use lossless column arrays and deduplicated citations, with a separately chunked source register, to keep repository files and browser data compact; retain earlier Colombian discrepancies independently until reviewed.

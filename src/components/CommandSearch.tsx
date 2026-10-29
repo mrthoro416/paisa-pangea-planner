@@ -21,6 +21,10 @@ const norm = (s: string) =>
     .replace(/[\u0300-\u036f]/g, "");
 
 const FILTER_WORDS: Array<[RegExp, FilterKey]> = [
+  [/freedom|free movement|libre circulacion/, "freedom_of_movement"],
+  [/travel permit|permiso de viaje/, "travel_permit_required"],
+  [/restriction|banned|restriccion/, "entry_banned"],
+  [/unknown|unconfirmed|sin confirmar/, "unknown"],
   [/visa[\s-]?free|no visa|sin visa/, "visa_free"],
   [/on arrival|voa|llegada/, "visa_on_arrival"],
   [/e-?visa|online|en linea|electronica/, "evisa"],
@@ -68,7 +72,8 @@ export function CommandSearch({ open, onOpenChange, onPickCountry, onPickFilter 
       return countries
         .filter((c) => ["JP", "BR", "ES", "US", "MX", "TH"].includes(c.code))
         .map((c) => ({ kind: "country", c }) as R);
-    const fk = FILTER_WORDS.find(([re]) => re.test(n))?.[1];
+    const detected = FILTER_WORDS.find(([re]) => re.test(n));
+    const fk = detected?.[1];
     const region = REGIONS.find((r) => n.includes(norm(r)) || n.includes(norm(t(r))));
     if (fk) {
       const label = t(FILTERS.find((f) => f.key === fk)?.label ?? "All");
@@ -81,7 +86,7 @@ export function CommandSearch({ open, onOpenChange, onPickCountry, onPickFilter 
     } else if (region) {
       out.push({ kind: "filter", key: "all", region, label: `${t("Fly to")} ${t(region)}` });
     }
-    const countryQ = n
+    const countryQ = (detected ? n.replace(detected[0], "") : n)
       .replace(
         /passport|pasaporte|sin visa|visa[\s-]?free|destinations?|destinos?|\bdays?\b|\bdias?\b|\d+/g,
         "",
@@ -221,9 +226,7 @@ export function CommandSearch({ open, onOpenChange, onPickCountry, onPickFilter 
                     onMouseEnter={() => setActive(i)}
                     onClick={() => choose(i)}
                   >
-                    <span className="text-xl" aria-hidden>
-                      {r.c.flag}
-                    </span>
+                    <span className={`fi fi-${r.c.code.toLowerCase()} text-xl`} aria-hidden />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-[15px] text-foreground">
                         {name(r.c)}

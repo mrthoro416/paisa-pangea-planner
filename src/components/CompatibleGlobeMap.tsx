@@ -59,7 +59,10 @@ export const CompatibleGlobeMap = forwardRef<CompatibleGlobeHandle, Props>(
           const mapped = collection.features
             .filter((item) => String(item.id) !== "010")
             .map((item) => {
-              const country = countryByNumeric.get(String(item.id ?? ""));
+              const country =
+                item.properties?.["name"] === "Kosovo"
+                  ? COUNTRIES.find((c) => c.code === "XK")
+                  : countryByNumeric.get(String(item.id ?? ""));
               return {
                 ...item,
                 properties: { code: country?.code ?? "", category: country?.category ?? "none" },

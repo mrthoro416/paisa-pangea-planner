@@ -89,7 +89,10 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap(
       const fc = feature(topo, topo.objects.countries) as unknown as GeoJSON.FeatureCollection;
       fc.features = fc.features.filter((f) => String(f.id) !== "010"); // Antarctica draws a seam on the globe
       fc.features.forEach((f, i) => {
-        const entry = countryByNumeric.get(String(f.id ?? ""));
+        const entry =
+          f.properties?.["name"] === "Kosovo"
+            ? COUNTRIES.find((c) => c.code === "XK")
+            : countryByNumeric.get(String(f.id ?? ""));
         f.id = i + 1;
         f.properties = {
           code: entry?.code ?? "",
@@ -157,9 +160,7 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap(
           "match",
           ["coalesce", ["feature-state", "cat"], ["get", "cat"]],
           ...Object.entries(colors).flat(),
-          "unknown",
-          cssVar("--muted-foreground"),
-          "#2c2c35",
+          cssVar("--land"),
         ] as never;
         map.addLayer({
           id: "fill",

@@ -40,5 +40,23 @@ data = {
     "dictionary": table("Data Dictionary", "Field / raw requirement"),
     "colombian_conflicts": conflicts,
 }
+source_fields = ["destination_rule_source", "source_url", "source_provenance", "source_level", "source_last_verified", "source_archive_url", "unverifiable_reason"]
+citations, citation_ids = [], {}
+columns = [k for k in rows[0] if k not in source_fields]
+packed = {}
+for key, row in records.items():
+    citation = tuple(row[k] for k in source_fields)
+    if citation not in citation_ids:
+        citation_ids[citation] = len(citations)
+        citations.append(list(citation))
+    packed[key] = [row[k] for k in columns] + [citation_ids[citation]]
+data["records"] = packed
+data["columns"] = columns
+data["citation_columns"] = source_fields
+data["citations"] = citations
+register = data.pop("sources")
+data["source_count"] = len(register)
 Path("src/data/global-travel-rules.json").write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")) + "\n")
-print(f"Imported {len(records)} pairs, {len(data['sources'])} sources, {len(conflicts)} retained Colombian discrepancies")
+for i in range(0, len(register), 5000):
+    Path(f"src/data/global-source-register-{i // 5000}.json").write_text(json.dumps(register[i:i+5000], ensure_ascii=False, separators=(",", ":")) + "\n")
+print(f"Imported {len(records)} pairs, {len(register)} sources, {len(conflicts)} retained Colombian discrepancies")

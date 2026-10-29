@@ -29,23 +29,27 @@ export const FILTERS: FilterDef[] = [
     label: "Visa req.",
     test: (c) => !isHomeCountry(c) && c.category === "visa_required",
   },
+  ...(["freedom_of_movement", "travel_permit_required", "entry_banned", "unknown"] as const).map(
+    (key) => ({
+      key,
+      label: {
+        freedom_of_movement: "Free movement",
+        travel_permit_required: "Travel permit",
+        entry_banned: "Restriction",
+        unknown: "Unconfirmed",
+      }[key],
+      test: (c: VisaCountry) => !isHomeCountry(c) && c.category === key,
+    }),
+  ),
   {
     key: "stay90",
     label: "90+ days",
-    test: (c) =>
-      !isHomeCountry(c) &&
-      c.category !== "unknown" &&
-      c.category !== "visa_required" &&
-      (c.maxStayDays ?? 0) >= 90,
+    test: (c) => !isHomeCountry(c) && isAccessible(c) && (c.maxStayDays ?? 0) >= 90,
   },
   {
     key: "stay30",
     label: "30+ days",
-    test: (c) =>
-      !isHomeCountry(c) &&
-      c.category !== "unknown" &&
-      c.category !== "visa_required" &&
-      (c.maxStayDays ?? 0) >= 30,
+    test: (c) => !isHomeCountry(c) && isAccessible(c) && (c.maxStayDays ?? 0) >= 30,
   },
 ];
 
@@ -53,7 +57,10 @@ export const filterByKey = new Map(FILTERS.map((f) => [f.key, f]));
 
 /** Countries a Colombian passport can reach without applying in advance at an embassy. */
 export function isAccessible(c: VisaCountry) {
-  return !isHomeCountry(c) && c.category !== "unknown" && c.category !== "visa_required";
+  return (
+    !isHomeCountry(c) &&
+    ["visa_free", "visa_on_arrival", "evisa", "eta", "freedom_of_movement"].includes(c.category)
+  );
 }
 
 export function formatVerified(iso: string, lang: "en" | "es" = "en") {

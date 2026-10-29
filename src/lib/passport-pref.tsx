@@ -37,7 +37,7 @@ interface Ctx {
 
 const PassportPrefContext = createContext<Ctx>({
   country: resolvePassportCountry(DEFAULT_CODE),
-  chosen: true,
+  chosen: false,
   setPassport: () => {},
 });
 
@@ -47,7 +47,7 @@ const PassportPrefContext = createContext<Ctx>({
 export function PassportPrefProvider({ children }: { children: ReactNode }) {
   // Start with the default and "chosen" so SSR and first client render match; sync after hydration.
   const [code, setCode] = useState<string>(DEFAULT_CODE);
-  const [chosen, setChosen] = useState(true);
+  const [chosen, setChosen] = useState(false);
 
   useEffect(() => {
     let saved: string | null = null;
@@ -56,8 +56,10 @@ export function PassportPrefProvider({ children }: { children: ReactNode }) {
     } catch {
       // A blocked storage area must not prevent an in-memory choice.
     }
-    if (saved && BY_CODE.has(saved)) setCode(saved);
-    else setChosen(false);
+    if (saved && BY_CODE.has(saved)) {
+      setCode(saved);
+      setChosen(true);
+    } else setChosen(false);
   }, []);
 
   const setPassport = useCallback((next: string) => {
