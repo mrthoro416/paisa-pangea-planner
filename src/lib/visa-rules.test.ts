@@ -1,6 +1,12 @@
 import { describe, it } from "node:test";
 import { strict as assert } from "node:assert";
-import { getVisaRule, getWorkbookRule, visaCountries, PASSPORT_OPTIONS, MATRIX_INFO } from "./visa-rules";
+import {
+  getVisaRule,
+  getWorkbookRule,
+  visaCountries,
+  PASSPORT_OPTIONS,
+  MATRIX_INFO,
+} from "./visa-rules";
 import { FILTERS, isAccessible } from "./filters";
 import { COUNTRIES } from "../data/countries";
 
@@ -52,7 +58,10 @@ describe("canonical global workbook", () => {
     assert.equal(getVisaRule("invalid", "BR").max_stay_days, null);
   });
   it("restriction and permit categories are not counted as accessible", () => {
-    for (const [passport, destination] of [["IR", "US"], ["HK", "CN"]]) {
+    for (const [passport, destination] of [
+      ["IR", "US"],
+      ["HK", "CN"],
+    ]) {
       const c = visaCountries(passport ?? "").find((r) => r.code === destination);
       assert.ok(c);
       assert.equal(isAccessible(c), false);

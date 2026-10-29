@@ -167,6 +167,7 @@ function Content({ country, onClose }: { country: CountryEntry; onClose: () => v
           {t("Home-country logic, not a visa-policy record")}
         </p>
       )}
+      <ClimateCard code={country.code} name={cname} />
       {rule.conflict && raw && (
         <Section title={t("Colombian discrepancy — review pending")}>
           <p className="py-3 text-sm text-muted-foreground">
@@ -205,7 +206,6 @@ function Content({ country, onClose }: { country: CountryEntry; onClose: () => v
           {raw.visa_type_ids && <Row k={t("Visa type IDs")} v={String(raw.visa_type_ids)} />}
         </Section>
       )}
-      <ClimateCard code={country.code} name={cname} />
       {rule.entry_conditions_notes && !home && (
         <Section title={t("Source conditions")}>
           <p className="py-3 text-sm text-muted-foreground">{rule.entry_conditions_notes}</p>
