@@ -56,8 +56,10 @@ export function PassportPrefProvider({ children }: { children: ReactNode }) {
     } catch {
       // A blocked storage area must not prevent an in-memory choice.
     }
-    if (saved && BY_CODE.has(saved)) setCode(saved);
-    else setChosen(false);
+    if (saved && BY_CODE.has(saved)) {
+      setCode(saved);
+      setChosen(true);
+    } else setChosen(false);
   }, []);
 
   const setPassport = useCallback((next: string) => {
