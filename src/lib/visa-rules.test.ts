@@ -37,7 +37,7 @@ describe("canonical global workbook", () => {
     assert.equal(ae.workbook_rule?.app_category, "visa_on_arrival");
     assert.equal(getVisaRule("CO", "PE").max_stay_days, 180);
     assert.equal(getWorkbookRule("CO", "PE")?.max_stay_days, 90);
-    assert.equal(getVisaRule("CO", "GB").entry_permission, "eta");
+    assert.equal(getVisaRule("CO", "GB").entry_permission, "visa_required");
   });
   it("unknown and missing pairs never imply visa-free, permission or unlimited stay", () => {
     const unknown = visaCountries("AL").find((c) => c.code === "AF");
@@ -65,7 +65,7 @@ describe("canonical global workbook", () => {
     assert.equal(rule.max_stay_days, null);
     assert.equal(rule.workbook_rule?.source_level, "row");
     assert.equal(rule.workbook_rule?.source_provenance, "intergovernmental");
-    assert.equal(rule.workbook_rule?.source_last_verified, "2026-10-10");
+    assert.equal(rule.workbook_rule?.source_last_verified, "2026-10-13");
     assert.deepEqual(rule.document_requirements, []);
     assert.equal(rule.passport_issuer_authority_url, null);
   });
