@@ -37,7 +37,7 @@ interface Ctx {
 
 const PassportPrefContext = createContext<Ctx>({
   country: resolvePassportCountry(DEFAULT_CODE),
-  chosen: true,
+  chosen: false,
   setPassport: () => {},
 });
 
@@ -47,7 +47,7 @@ const PassportPrefContext = createContext<Ctx>({
 export function PassportPrefProvider({ children }: { children: ReactNode }) {
   // Start with the default and "chosen" so SSR and first client render match; sync after hydration.
   const [code, setCode] = useState<string>(DEFAULT_CODE);
-  const [chosen, setChosen] = useState(true);
+  const [chosen, setChosen] = useState(false);
 
   useEffect(() => {
     let saved: string | null = null;
