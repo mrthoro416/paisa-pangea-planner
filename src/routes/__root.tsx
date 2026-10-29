@@ -85,10 +85,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Paisa Planner" },
       {
         name: "description",
-        content: "Where can Colombian passport holders travel — and what do they need?",
+        content: "Passport-aware travel planning for 199 nationalities, with sourced entry rules and explicit unknowns.",
       },
       { property: "og:title", content: "Paisa Planner" },
-      { property: "og:description", content: "Where can Colombian passport holders travel?" },
+      { property: "og:description", content: "Explore sourced passport-aware entry rules, weather and travel styles." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "theme-color", content: "#141821" },
