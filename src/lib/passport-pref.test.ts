@@ -3,7 +3,7 @@ import { strict as assert } from "node:assert";
 import { PASSPORT } from "../data/countries";
 import { resolvePassportCountry } from "./passport-pref";
 
-describe("display-only passport preference", () => {
+describe("locally saved passport preference", () => {
   test("saved ISO country code resolves to Japan", () => {
     assert.equal(resolvePassportCountry("JP").code, "JP");
   });

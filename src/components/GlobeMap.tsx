@@ -157,9 +157,7 @@ export const GlobeMap = forwardRef<GlobeHandle, Props>(function GlobeMap(
           "match",
           ["coalesce", ["feature-state", "cat"], ["get", "cat"]],
           ...Object.entries(colors).flat(),
-          "unknown",
-          cssVar("--muted-foreground"),
-          "#2c2c35",
+          cssVar("--land"),
         ] as never;
         map.addLayer({
           id: "fill",
