@@ -26,7 +26,7 @@ export function PassportHUD({ count, total, label, onReset }: Props) {
       </button>
       <div className="min-w-0 leading-tight" aria-live="polite">
         <p className="mono truncate text-foreground/90">
-          {country.flag}{" "}
+          <span className={`fi fi-${country.code.toLowerCase()} mr-1`} aria-hidden />
           {lang === "es" ? `${t("passport")} ${name(country)}` : `${country.name} passport`}
         </p>
         <p className="mono truncate text-muted-foreground">

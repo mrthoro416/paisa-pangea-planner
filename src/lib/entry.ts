@@ -25,10 +25,34 @@ export interface CategoryMeta {
 }
 
 export const CATEGORIES: Record<EntryCategory, CategoryMeta> = {
-  freedom_of_movement: { key: "freedom_of_movement", label: "Freedom of movement", short: "Free movement", description: "Free movement reported by the source; confirm applicable conditions.", colorVar: "--cat-green" },
-  travel_permit_required: { key: "travel_permit_required", label: "Travel permit required", short: "Travel permit", description: "A special travel permit is reported; verify eligibility with the linked source.", colorVar: "--cat-yellow" },
-  entry_banned: { key: "entry_banned", label: "Entry restriction reported", short: "Restriction", description: "An entry restriction is reported; exceptions are not fully covered.", colorVar: "--destructive" },
-  unknown: { key: "unknown", label: "Requirements unconfirmed", short: "Unconfirmed", description: "Unconfirmed does not mean visa-free or entry permitted.", colorVar: "--muted-foreground" },
+  freedom_of_movement: {
+    key: "freedom_of_movement",
+    label: "Freedom of movement",
+    short: "Free movement",
+    description: "Free movement reported by the source; confirm applicable conditions.",
+    colorVar: "--cat-green",
+  },
+  travel_permit_required: {
+    key: "travel_permit_required",
+    label: "Travel permit required",
+    short: "Travel permit",
+    description: "A special travel permit is reported; verify eligibility with the linked source.",
+    colorVar: "--cat-yellow",
+  },
+  entry_banned: {
+    key: "entry_banned",
+    label: "Entry restriction reported",
+    short: "Restriction",
+    description: "An entry restriction is reported; exceptions are not fully covered.",
+    colorVar: "--destructive",
+  },
+  unknown: {
+    key: "unknown",
+    label: "Requirements unconfirmed",
+    short: "Unconfirmed",
+    description: "Unconfirmed does not mean visa-free or entry permitted.",
+    colorVar: "--muted-foreground",
+  },
   visa_free: {
     key: "visa_free",
     label: "Visa-free",

@@ -24,7 +24,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "A passport-aware travel globe with partial Colombian seed rules, explicit missing coverage, climate averages and destination-authority references.",
+          "A passport-aware travel globe with 199 passport nationalities, sourced planning rules, explicit unknown coverage, climate averages and destination-authority references.",
       },
       { property: "og:title", content: "Paisa Planner — Passport & Visa Globe" },
       {

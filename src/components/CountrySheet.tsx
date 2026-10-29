@@ -159,10 +159,7 @@ function Content({ country, onClose }: { country: CountryEntry; onClose: () => v
         <Row k={t("Passport")} v={chosen ? name(passport) : t("Choose your passport")} />
         <Row k={t("Type")} v={t(meta.label)} />
         {(known || raw) && (
-          <Row
-            k={t("Stay")}
-            v={maxStayText(resolved, lang) ?? t("Not available")}
-          />
+          <Row k={t("Stay")} v={maxStayText(resolved, lang) ?? t("Not available")} />
         )}
       </Section>
       {home && (
@@ -172,9 +169,23 @@ function Content({ country, onClose }: { country: CountryEntry; onClose: () => v
       )}
       {rule.conflict && raw && (
         <Section title={t("Colombian discrepancy — review pending")}>
-          <p className="py-3 text-sm text-muted-foreground">{t("Existing Colombian result retained until reviewed.")}</p>
-          <Row k={t("Workbook category")} v={t(categoryMeta({ ...resolved, category: raw.app_category, rule: { ...rule, entry_permission: raw.app_category } }).label)} />
-          <Row k={t("Workbook stay")} v={raw.max_stay_days == null ? t("Not available") : `${raw.max_stay_days} ${t("days")}`} />
+          <p className="py-3 text-sm text-muted-foreground">
+            {t("Existing Colombian result retained until reviewed.")}
+          </p>
+          <Row
+            k={t("Workbook category")}
+            v={t(
+              categoryMeta({
+                ...resolved,
+                category: raw.app_category,
+                rule: { ...rule, entry_permission: raw.app_category },
+              }).label,
+            )}
+          />
+          <Row
+            k={t("Workbook stay")}
+            v={raw.max_stay_days == null ? t("Not available") : `${raw.max_stay_days} ${t("days")}`}
+          />
           <Row k={t("Existing source date")} v={rule.source_as_of ?? t("Not available")} />
           <p className="py-3 break-words text-xs text-muted-foreground">{rule.source_dataset}</p>
         </Section>
@@ -182,9 +193,15 @@ function Content({ country, onClose }: { country: CountryEntry; onClose: () => v
       {raw && (
         <Section title={t("Workbook details")}>
           <Row k={t("Raw requirement")} v={raw.requirement_raw} />
-          <Row k={t("Extension (days)")} v={raw.extendable_days == null ? t("Not available") : String(raw.extendable_days)} />
+          <Row
+            k={t("Extension (days)")}
+            v={raw.extendable_days == null ? t("Not available") : String(raw.extendable_days)}
+          />
           <Row k={t("Stay window")} v={raw.stay_window_basis ?? t("Not available")} />
-          <Row k={t("Window (days)")} v={raw.stay_window_days == null ? t("Not available") : String(raw.stay_window_days)} />
+          <Row
+            k={t("Window (days)")}
+            v={raw.stay_window_days == null ? t("Not available") : String(raw.stay_window_days)}
+          />
           {raw.visa_type_ids && <Row k={t("Visa type IDs")} v={String(raw.visa_type_ids)} />}
         </Section>
       )}
@@ -217,7 +234,11 @@ function Content({ country, onClose }: { country: CountryEntry; onClose: () => v
       <Section title={t("Data & sources")}>
         <Row
           k={t("Coverage")}
-          v={t(rule.coverage_status === "missing" ? "Information unavailable" : "Imported planning data")}
+          v={t(
+            rule.coverage_status === "missing"
+              ? "Information unavailable"
+              : "Imported planning data",
+          )}
         />
         <Row k={t("Official verification")} v={t("Not yet verified")} />
         {rule.source_as_of && (
@@ -231,17 +252,55 @@ function Content({ country, onClose }: { country: CountryEntry; onClose: () => v
       </Section>
       {raw && (
         <Section title={t("Workbook source")}>
-          <p className="py-3 break-words text-sm text-muted-foreground">{raw.destination_rule_source}</p>
-          <Row k={t("Source level")} v={t(raw.source_level === "row" ? "Passport–destination source" : "Destination policy source")} />
+          <p className="py-3 break-words text-sm text-muted-foreground">
+            {raw.destination_rule_source}
+          </p>
+          <Row
+            k={t("Source level")}
+            v={t(
+              raw.source_level === "row"
+                ? "Passport–destination source"
+                : "Destination policy source",
+            )}
+          />
           <Row k={t("Source provenance")} v={t(raw.source_provenance ?? "Not available")} />
-          <Row k={t("Publisher last verified")} v={raw.source_last_verified ?? t("Not available")} />
-          <p className="py-3 text-xs text-muted-foreground">{t("Publisher source date — not an official review by Paisa Planner.")}</p>
-          {raw.unverifiable_reason && <p className="py-3 text-xs text-muted-foreground">{raw.unverifiable_reason}</p>}
-          {raw.source_url && <a className="tap-target flex break-all items-center text-sm text-beacon" href={raw.source_url} target="_blank" rel="noopener noreferrer">{t("Open recorded source — new tab")} ↗</a>}
-          {raw.source_archive_url && <a className="tap-target flex items-center text-sm text-beacon" href={raw.source_archive_url} target="_blank" rel="noopener noreferrer">{t("Source archive — new tab")} ↗</a>}
+          <Row
+            k={t("Publisher last verified")}
+            v={raw.source_last_verified ?? t("Not available")}
+          />
+          <p className="py-3 text-xs text-muted-foreground">
+            {t("Publisher source date — not an official review by Paisa Planner.")}
+          </p>
+          {raw.unverifiable_reason && (
+            <p className="py-3 text-xs text-muted-foreground">{raw.unverifiable_reason}</p>
+          )}
+          {raw.source_url && (
+            <a
+              className="tap-target flex break-all items-center text-sm text-beacon"
+              href={raw.source_url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t("Open recorded source — new tab")} ↗
+            </a>
+          )}
+          {raw.source_archive_url && (
+            <a
+              className="tap-target flex items-center text-sm text-beacon"
+              href={raw.source_archive_url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t("Source archive — new tab")} ↗
+            </a>
+          )}
         </Section>
       )}
-      <p className="mt-4 break-words text-xs text-muted-foreground">{t("Ordinary passports, direct entry, short-stay tourism only. Transit, work, study and residence exceptions are not fully covered.")}</p>
+      <p className="mt-4 break-words text-xs text-muted-foreground">
+        {t(
+          "Ordinary passports, direct entry, short-stay tourism only. Transit, work, study and residence exceptions are not fully covered.",
+        )}
+      </p>
       <details className="mt-4">
         <summary className="tap-target flex cursor-pointer items-center text-sm text-muted-foreground">
           {t("Provenance")}

@@ -14,7 +14,7 @@ export const Route = createFileRoute("/coverage")({
       {
         name: "description",
         content:
-          "Audit the partial Colombian seed rules and missing passport/destination pairs in Paisa Planner's uploaded matrix.",
+          "Audit 199 passport nationalities, source provenance, unconfirmed rules and Colombian discrepancies in Paisa Planner.",
       },
       { property: "og:title", content: "Passport Data Coverage — Paisa Planner" },
       {
@@ -39,7 +39,12 @@ function Coverage() {
     () =>
       countries.filter(
         (c) =>
-          (status === "all" || c.rule.coverage_status === status) &&
+          (status === "all" ||
+            (status === "unknown"
+              ? c.category === "unknown"
+              : status === "conflict"
+                ? c.rule.conflict
+                : c.rule.coverage_status === status)) &&
           `${name(c)} ${c.name} ${c.code} ${c.iso3}`.toLowerCase().includes(query.toLowerCase()),
       ),
     [countries, name, query, status],
@@ -56,7 +61,7 @@ function Coverage() {
         <h1 className="masthead mt-8 text-3xl">{t("Passport data coverage")}</h1>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
           {t(
-            "Only Colombian passport rules are imported so far. Other passports show unknown results, not Colombian rules. Confirm current eligibility with official authorities.",
+            "Sourced planning data covers 199 passports and 199 destinations. Not every pair is independently verified. Confirm entry rules before booking.",
           )}
         </p>
         <p className="mono mt-4 text-muted-foreground">
@@ -69,9 +74,9 @@ function Coverage() {
           <dl className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
             {[
               ["Partial — imported", coverage.partial],
-              ["Home-country logic", coverage.home],
+              ["Unconfirmed", coverage.unknown],
               ["Missing", coverage.missing],
-              ["Officially verified", coverage.verified],
+              ["Discrepancies", coverage.conflicts],
             ].map(([label, value]) => (
               <div key={label}>
                 <dt className="text-xs text-muted-foreground">{t(String(label))}</dt>
@@ -97,7 +102,8 @@ function Coverage() {
             {[
               ["all", "All"],
               ["partial", "Partial — imported"],
-              ["logic_only", "Home-country logic"],
+              ["unknown", "Unconfirmed"],
+              ["conflict", "Discrepancies"],
               ["missing", "Missing"],
             ].map(([value, label]) => (
               <option key={value} value={value}>
@@ -140,9 +146,16 @@ function Coverage() {
         <section className="mt-8 border-t border-border pt-6">
           <h2 className="masthead text-xl">{t("Provenance")}</h2>
           <p className="mt-3 break-words text-sm text-muted-foreground">{MATRIX_INFO.workbook}</p>
+          <p className="mt-3 break-words text-sm text-muted-foreground">
+            {MATRIX_INFO.attribution}
+          </p>
+          <p className="mono mt-3 text-muted-foreground">
+            {MATRIX_INFO.sourceCount.toLocaleString()} {t("Registered sources")} ·{" "}
+            {MATRIX_INFO.conflictCount} {t("Colombian discrepancies retained")}
+          </p>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
             {t("Dataset-derived guidance, not individually verified against official authorities.")}{" "}
-            {t("Source date")}: 2026-09-26.
+            {t("Source date")}: {MATRIX_INFO.modified}.
           </p>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
             {t("Passport-specific document requirements are not available in this workbook.")}

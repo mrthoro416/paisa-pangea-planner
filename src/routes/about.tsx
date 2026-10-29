@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import { BeaconMark } from "@/components/BeaconLogo";
 import { CATEGORIES, CATEGORY_ORDER } from "@/lib/entry";
-import { PASSPORT } from "@/data/countries";
+import { MATRIX_INFO } from "@/lib/visa-rules";
 import { useVisaCountries } from "@/lib/use-visa-countries";
 import { useLang, longText } from "@/lib/i18n";
 
@@ -13,13 +13,13 @@ export const Route = createFileRoute("/about")({
       {
         name: "description",
         content:
-          "How Paisa Planner classifies entry requirements for Colombian passport holders, where the data comes from, and how to verify it before you travel.",
+          "How Paisa Planner classifies entry requirements for 199 passport nationalities, where the data comes from, and how to verify it before you travel.",
       },
       { property: "og:title", content: "About & Data Sources — Paisa Planner" },
       {
         property: "og:description",
         content:
-          "Methodology, category definitions and official sources behind the Colombian passport entry guide.",
+          "Methodology, category definitions and official sources behind the global passport planning guide.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -29,7 +29,7 @@ export const Route = createFileRoute("/about")({
 });
 
 function About() {
-  const { lang, t, name } = useLang();
+  const { lang, t } = useLang();
   const countries = useVisaCountries();
   const counts = CATEGORY_ORDER.map((key) => ({
     key,
@@ -58,14 +58,14 @@ function About() {
           {t("About this guide")}
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-foreground/85">
-          {longText(lang, "aboutIntro", { passport: `${PASSPORT.flag} ${name(PASSPORT)}` })}
+          {longText(lang, "aboutIntro")}
         </p>
 
         <Link to="/coverage" className="tap-target mt-4 flex items-center text-sm text-beacon">
           {t("View coverage")} →
         </Link>
         <h2 className="font-display mt-10 text-xl font-semibold text-foreground">
-          {t("The five categories")}
+          {t("Entry categories")}
         </h2>
         <ul className="mt-4 space-y-3">
           {counts.map(({ key, n }) => (
@@ -97,7 +97,9 @@ function About() {
           {t("Where the data comes from")}
         </h2>
         <p className="mt-3 text-sm leading-relaxed text-foreground/85">
-          {longText(lang, "aboutData", { date: "2026-09-26" })}
+          {longText(lang, "aboutData", { date: MATRIX_INFO.modified })}
+          <br />
+          {MATRIX_INFO.attribution}
         </p>
 
         <h2 className="font-display mt-10 text-xl font-semibold text-foreground">

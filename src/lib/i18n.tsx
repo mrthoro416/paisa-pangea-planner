@@ -37,6 +37,67 @@ export const SPANISH_COUNTRIES = new Set([
 ]);
 
 const ES: Record<string, string> = {
+  "Freedom of movement": "Libre circulación",
+  "Free movement": "Libre circulación",
+  "Travel permit required": "Permiso de viaje requerido",
+  "Travel permit": "Permiso de viaje",
+  "Entry restriction reported": "Restricción de entrada reportada",
+  Restriction: "Restricción",
+  "Requirements unconfirmed": "Requisitos sin confirmar",
+  Unconfirmed: "Sin confirmar",
+  "Information unavailable": "Información no disponible",
+  "eVisa required": "Visa electrónica requerida",
+  "Electronic travel authorisation required": "Autorización electrónica de viaje requerida",
+  "Choose your passport": "Elige tu pasaporte",
+  "Planning data": "Datos orientativos",
+  Imported: "Importado",
+  "Imported planning data": "Datos orientativos importados",
+  Discrepancies: "Discrepancias",
+  "Entry categories": "Categorías de entrada",
+  "Registered sources": "Fuentes registradas",
+  "Colombian discrepancies retained": "Discrepancias colombianas conservadas",
+  "Choose your passport nationality, not your residence or location. Sourced planning data covers 199 passports; confirm entry rules before booking.":
+    "Elige la nacionalidad de tu pasaporte, no tu residencia o ubicación. Los datos orientativos cubren 199 pasaportes; confirma las reglas de entrada antes de reservar.",
+  "Sourced planning data covers 199 passports and 199 destinations. Not every pair is independently verified. Confirm entry rules before booking.":
+    "Los datos orientativos cubren 199 pasaportes y 199 destinos. No todas las combinaciones están verificadas individualmente. Confirma las reglas de entrada antes de reservar.",
+  "Colombian discrepancy — review pending": "Discrepancia colombiana — revisión pendiente",
+  "Existing Colombian result retained until reviewed.":
+    "Se conserva el resultado colombiano existente hasta su revisión.",
+  "Workbook category": "Categoría del archivo",
+  "Workbook stay": "Estadía del archivo",
+  "Existing source date": "Fecha de la fuente existente",
+  "Workbook details": "Detalles del archivo",
+  "Raw requirement": "Requisito original",
+  "Extension (days)": "Extensión (días)",
+  "Stay window": "Período de estadía",
+  "Window (days)": "Período (días)",
+  "Visa type IDs": "Identificadores de visa",
+  "Workbook source": "Fuente del archivo",
+  "Source level": "Nivel de fuente",
+  "Passport–destination source": "Fuente de pasaporte–destino",
+  "Destination policy source": "Fuente de política del destino",
+  "Source provenance": "Procedencia de la fuente",
+  "Publisher last verified": "Última verificación del editor",
+  "Publisher source date — not an official review by Paisa Planner.":
+    "Fecha de revisión del editor; no es una verificación oficial de Paisa Planner.",
+  "Open recorded source — new tab": "Abrir fuente registrada — pestaña nueva",
+  "Source archive — new tab": "Archivo de la fuente — pestaña nueva",
+  "Open recorded entry source": "Abrir fuente de entrada registrada",
+  "Ordinary passports, direct entry, short-stay tourism only. Transit, work, study and residence exceptions are not fully covered.":
+    "Solo pasaportes ordinarios, entrada directa y turismo de corta duración. No se cubren plenamente tránsito, trabajo, estudio ni excepciones por residencia.",
+  "Free movement reported by the source; confirm applicable conditions.":
+    "La fuente informa libre circulación; confirma las condiciones aplicables.",
+  "A special travel permit is reported; verify eligibility with the linked source.":
+    "Se informa un permiso especial de viaje; verifica la elegibilidad con la fuente enlazada.",
+  "An entry restriction is reported; exceptions are not fully covered.":
+    "Se informa una restricción de entrada; no se cubren todas las excepciones.",
+  "Unconfirmed does not mean visa-free or entry permitted.":
+    "Sin confirmar no significa entrada sin visa ni entrada permitida.",
+  "first-party": "Autoridad del destino",
+  "third-party-government": "Gobierno de un tercer país",
+  intergovernmental: "Organismo intergubernamental",
+  "designated-operator": "Operador designado",
+
   Unknown: "Desconocido",
   "Visa information not available": "Información de visa no disponible",
   "Not yet verified": "Aún no verificado",
@@ -190,9 +251,9 @@ const ES: Record<string, string> = {
 const LONG: Record<Lang, Record<string, string>> = {
   en: {
     aboutIntro:
-      "Paisa Planner connects your saved passport choice to available destination rules. The uploaded matrix currently contains only partial Colombian rules; other passport combinations are unknown, never inferred. Climate and holiday styles remain available for every destination.",
+      "Paisa Planner connects your saved passport choice to available destination rules. The workbook covers 199 passports and 199 destinations. Unconfirmed rules remain unknown; Colombian discrepancies retain the earlier result pending review. Climate and holiday styles remain available for every destination.",
     aboutData:
-      "The uploaded workbook imports the existing passport-index dataset (github.com/ilyankou/passport-index-dataset), source date {date}. These imported records have not been individually verified against current official authorities. Destination links are inherited references, not proof of eligibility. Passport-issuer links and passport-specific document lists are not supplied.",
+      "TravelRequirements.info v1.3.0, dataset modified {date}, supplies the canonical rules. Source citations may apply to a passport–destination pair or only to the destination policy. Publisher verification dates are not independent checks by Paisa Planner. Earlier Colombian rules are retained where categories or stay limits conflict. Ordinary passports, direct entry and short-stay tourism only; no passport-issuer links or complete supporting-document lists are supplied.",
     aboutVerify:
       "Entry requirements can change at short notice. Always verify current requirements with the destination's official immigration or foreign ministry website — and with your airline — before traveling. This guide is an information tool, not a visa service.",
     aboutPrivacy:
@@ -205,9 +266,9 @@ const LONG: Record<Lang, Record<string, string>> = {
   },
   es: {
     aboutIntro:
-      "Paisa Planner conecta tu elección de pasaporte con las reglas disponibles de cada destino. El archivo importado contiene solo reglas parciales para Colombia; otras combinaciones son desconocidas y nunca se infieren. El clima y los estilos de viaje siguen disponibles para todos los destinos.",
+      "Paisa Planner conecta tu elección de pasaporte con las reglas disponibles de cada destino. El archivo cubre 199 pasaportes y 199 destinos. Las reglas sin confirmar siguen siendo desconocidas; las discrepancias colombianas conservan el resultado anterior hasta su revisión. El clima y los estilos de viaje siguen disponibles para todos los destinos.",
     aboutData:
-      "El archivo importado contiene los datos existentes de passport-index (github.com/ilyankou/passport-index-dataset), con fecha de fuente {date}. Los registros importados no se han verificado individualmente con las autoridades oficiales actuales. Los enlaces heredados no prueban la elegibilidad. No se proporcionaron enlaces de autoridades emisoras ni listas de documentos específicas por pasaporte.",
+      "TravelRequirements.info v1.3.0, modificado el {date}, proporciona las reglas. Las fuentes pueden corresponder a la combinación pasaporte–destino o solo a la política del destino. Las fechas del editor no son verificaciones independientes de Paisa Planner. Se conservan reglas colombianas anteriores cuando hay diferencias de categoría o estadía. Solo pasaportes ordinarios, entrada directa y turismo corto; no hay enlaces de emisores ni listas completas de documentos.",
     aboutVerify:
       "Los requisitos de entrada pueden cambiar sin previo aviso. Verifica siempre los requisitos vigentes en el sitio oficial de migración o cancillería del destino, y con tu aerolínea, antes de viajar. Esta guía es una herramienta informativa, no un servicio de visas.",
     aboutPrivacy:
