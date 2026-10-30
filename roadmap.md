@@ -5,3 +5,4 @@
 - [x] Import canonical global rules, passport registry, source register and category dictionary; retain Colombian discrepancies.
 - [x] Connect all categories and source details in English/Spanish while preserving travel state.
 - [x] Verify representative passports, unknown/missing safety, onboarding and desktop/mobile flows; do not publish.
+- [ ] Align visa-free filtering with green free-movement destinations and verify category filtering on both globes.
