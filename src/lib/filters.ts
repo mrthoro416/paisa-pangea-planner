@@ -7,6 +7,7 @@ export type FilterKey = "all" | EntryCategory | "stay90" | "stay30";
 export interface FilterDef {
   key: FilterKey;
   label: string;
+  description?: string;
   test: (c: VisaCountry) => boolean;
 }
 
@@ -15,7 +16,9 @@ export const FILTERS: FilterDef[] = [
   {
     key: "visa_free",
     label: "Visa-free",
-    test: (c) => !isHomeCountry(c) && c.category === "visa_free",
+    description: "Visa-free includes free movement; Free movement shows only that category.",
+    test: (c) =>
+      !isHomeCountry(c) && ["visa_free", "freedom_of_movement"].includes(c.category),
   },
   {
     key: "visa_on_arrival",
