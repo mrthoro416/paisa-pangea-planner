@@ -24,8 +24,8 @@ describe("passport-aware map filters", () => {
     assert.ok(filter);
     for (const passport of PASSPORT_OPTIONS) {
       for (const country of visaCountries(passport.code)) {
-        const expected = !isHomeCountry(country) &&
-          CATEGORIES[country.category].colorVar === "--cat-green";
+        const expected =
+          !isHomeCountry(country) && CATEGORIES[country.category].colorVar === "--cat-green";
         assert.equal(filter.test(country), expected, `${passport.code}:${country.code}`);
       }
     }
@@ -36,14 +36,20 @@ describe("passport-aware map filters", () => {
     for (const passport of PASSPORT_OPTIONS) {
       for (const country of visaCountries(passport.code)) {
         for (const filter of exact) {
-          assert.equal(filter.test(country), !isHomeCountry(country) && country.category === filter.key,
-            `${passport.code}:${country.code}:${filter.key}`);
+          assert.equal(
+            filter.test(country),
+            !isHomeCountry(country) && country.category === filter.key,
+            `${passport.code}:${country.code}:${filter.key}`,
+          );
         }
       }
     }
   });
 
   it("never treats missing passport rules as visa-free", () => {
-    assert.equal(visaCountries("invalid").filter((c) => filterByKey.get("visa_free")?.test(c)).length, 0);
+    assert.equal(
+      visaCountries("invalid").filter((c) => filterByKey.get("visa_free")?.test(c)).length,
+      0,
+    );
   });
 });
