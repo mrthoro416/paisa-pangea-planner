@@ -37,6 +37,8 @@ export const SPANISH_COUNTRIES = new Set([
 ]);
 
 const ES: Record<string, string> = {
+  "Visa-free includes free movement; Free movement shows only that category.":
+    "Sin visa incluye la libre circulación; Libre circulación muestra solo esa categoría.",
   "Freedom of movement": "Libre circulación",
   "Free movement": "Libre circulación",
   "Travel permit required": "Permiso de viaje requerido",

@@ -2,6 +2,7 @@ import { FILTERS, type FilterKey } from "@/lib/filters";
 import { CATEGORIES } from "@/lib/entry";
 import type { EntryCategory } from "@/data/countries";
 import { useLang } from "@/lib/i18n";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   value: FilterKey;
@@ -21,20 +22,32 @@ export function FilterBar({ value, counts, onChange }: Props) {
         const active = f.key === value;
         const cat = CATEGORIES[f.key as EntryCategory];
         return (
-          <button
+          <Button
             key={f.key}
+            variant="ghost"
             type="button"
             role="radio"
             aria-checked={active}
+            title={f.description ? t(f.description) : undefined}
             onClick={() => onChange(active && f.key !== "all" ? "all" : f.key)}
             className={`flex min-h-10 shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-medium transition-all duration-300 active:scale-95 ${
-              active ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground"
+              active
+                ? "bg-foreground text-background hover:bg-foreground hover:text-background"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            {cat && <span className="size-1.5 rounded-full" style={{ background: `var(${cat.colorVar})` }} aria-hidden />}
+            {cat && (
+              <span
+                className="size-1.5 rounded-full"
+                style={{ background: `var(${cat.colorVar})` }}
+                aria-hidden
+              />
+            )}
             {t(f.label)}
-            <span className={`mono text-[9.5px] ${active ? "text-background/60" : "text-faint"}`}>{counts[f.key]}</span>
-          </button>
+            <span className={`mono text-[9.5px] ${active ? "text-background/60" : "text-faint"}`}>
+              {counts[f.key]}
+            </span>
+          </Button>
         );
       })}
     </div>
